@@ -7,6 +7,7 @@ import type { ProjectMotivation } from '../resources/project-motivation.js';
 import type { UserPreferences } from '../resources/user-preferences.js';
 import type { StorageAdapter } from '../storage/adapter.js';
 import { createStorageAdapter } from '../storage/auto-detect.js';
+import { getMnemoHookConnectionState } from '../storage/auto-detect.js';
 import { resolveCurrentRepoSlug } from './helpers.js';
 
 async function recordCount(storage: StorageAdapter): Promise<number> {
@@ -40,14 +41,16 @@ export async function runStatusCommand(storage: StorageAdapter, slug?: string): 
   console.log(formatStatusRow('Project', metadata?.display_name ?? currentSlug));
   console.log(formatStatusRow('Repo URL', metadata?.repo_url ?? null));
   printSection('Hook status');
+  console.log(formatStatusRow('mnemo-hook', getMnemoHookConnectionState(storage)));
   console.log(formatStatusRow('Git hook', config?.hook_installed ?? null));
   console.log(formatStatusRow('Auto push', config?.auto_push ?? null));
   printSection('Memory stats');
-  console.log(formatStatusRow('Why built', motivation?.recorded_at?.slice(0, 10) ?? null));
+  console.log(formatStatusRow('Why built', motivation?.answer ?? '[not recorded]'));
   console.log(formatStatusRow('Language', preferences?.language ?? null));
+  if (!motivation) console.log('Hint: run `nerdspecs write` to save why you built this project.');
   printSection('Landing page');
   console.log(formatStatusRow('Enabled', config?.landing_page_enabled ?? null));
-  console.log(formatStatusRow('URL', config?.landing_page_url ?? null));
+  console.log(formatStatusRow('URL', config?.landing_page_url ?? '[not yet generated]'));
   printSection('Decision count');
   console.log(formatStatusRow('Saved decisions', String(decisions)));
 }

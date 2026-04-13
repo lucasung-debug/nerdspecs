@@ -18,5 +18,6 @@ export async function createLLMProvider(): Promise<LLMProvider> {
   if (process.env['OPENAI_API_KEY']) {
     return new OpenAIProvider();
   }
+  console.warn('⚠ No API key found. Using offline mode — summaries will be template-based.');
   return new MockProvider();
 }

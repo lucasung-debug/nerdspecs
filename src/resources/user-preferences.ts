@@ -2,6 +2,7 @@
 // @SPEC docs/planning/06-tasks.md#P1-R1-T1
 
 import type { StorageAdapter } from '../storage/adapter.js';
+import { nowIso } from '../utils.js';
 
 export interface UserPreferences {
   language: 'en' | 'ko' | 'both';
@@ -29,7 +30,7 @@ export async function getPreferences(storage: StorageAdapter): Promise<UserPrefe
   const existing = await storage.get<UserPreferences>(KEY);
   if (existing) return existing;
 
-  const now = new Date().toISOString();
+  const now = nowIso();
   const prefs: UserPreferences = { ...DEFAULTS, created_at: now, updated_at: now };
   await storage.set(KEY, prefs);
   return prefs;
@@ -43,7 +44,7 @@ export async function setPreferences(
   const updated: UserPreferences = {
     ...existing,
     ...partial,
-    updated_at: new Date().toISOString(),
+    updated_at: nowIso(),
   };
   await storage.set(KEY, updated);
   return updated;

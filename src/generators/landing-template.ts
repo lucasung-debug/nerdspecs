@@ -18,6 +18,8 @@ interface SafeLandingData extends Omit<LandingData, 'project_name' | 'summary' |
   tech_stack: { language: string; frameworks: string[] };
 }
 
+const LANGUAGE_MODES = ['en', 'ko', 'both'] as const;
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -51,6 +53,10 @@ function sanitizeData(data: LandingData): SafeLandingData {
     },
     repo_url: normalizeRepoUrl(data.repo_url),
   };
+}
+
+function normalizeLanguageMode(mode: LandingData['language_mode']): LandingData['language_mode'] {
+  return LANGUAGE_MODES.includes(mode) ? mode : 'en';
 }
 
 function buildNav(data: SafeLandingData): string {
@@ -135,8 +141,8 @@ function buildTechFooter(data: SafeLandingData): string {
 </footer>`;
 }
 
-function buildCSS(): string {
-  return `<style>
+function baseCSS(): string {
+  return `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;color:#1a1a1a;background:#fff;line-height:1.6}
 a{color:inherit;text-decoration:none}
@@ -160,7 +166,11 @@ section{padding:4rem 2rem;max-width:1100px;margin:0 auto}
 .step{border:1px solid #eee;border-radius:12px;padding:1.5rem;text-align:center}
 .step-num{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:50%;background:#111;color:#fff;font-weight:700;margin-bottom:.75rem}
 .step code{display:block;margin-top:.75rem;background:#f5f5f5;padding:.5rem;border-radius:6px;font-size:.85rem}
-footer#tech-footer{text-align:center;padding:2rem;border-top:1px solid #eee;color:#888;font-size:.875rem}
+footer#tech-footer{text-align:center;padding:2rem;border-top:1px solid #eee;color:#888;font-size:.875rem}`;
+}
+
+function responsiveCSS(): string {
+  return `
 @media (max-width: 768px){
 .card-grid{grid-template-columns:repeat(2,1fr)}
 .solution-grid{grid-template-columns:1fr;text-align:center}
@@ -171,11 +181,16 @@ footer#tech-footer{text-align:center;padding:2rem;border-top:1px solid #eee;colo
 .card-grid{grid-template-columns:1fr}
 .step-grid{grid-template-columns:1fr}
 #hero h1{font-size:1.75rem}
+}`;
 }
-</style>`;
+
+function buildCSS(): string {
+  return `<style>${baseCSS()}${responsiveCSS()}</style>`;
 }
 
 function buildScript(mode: LandingData['language_mode']): string {
+  const safeMode = JSON.stringify(normalizeLanguageMode(mode));
+
   return `<script>
 var LANGS=['en','ko','both'];
 function showLang(l){
@@ -191,7 +206,7 @@ function cycleLang(){
   showLang(next);
 }
 function toggleLang(l){showLang(l);}
-showLang(localStorage.getItem('nerdspecs-lang')||'${mode}');
+showLang(localStorage.getItem('nerdspecs-lang')||${safeMode});
 </script>`;
 }
 

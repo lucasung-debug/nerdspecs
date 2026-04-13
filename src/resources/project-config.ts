@@ -4,6 +4,7 @@
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { StorageAdapter } from '../storage/adapter.js';
+import { nowIso } from '../utils.js';
 
 const execAsync = promisify(exec);
 
@@ -19,7 +20,7 @@ export interface ProjectConfig {
   updated_at: string;
 }
 
-const DEFAULT_README_SECTIONS: Record<string, boolean> = {
+export const DEFAULT_README_SECTIONS: Record<string, boolean> = {
   hero: true,
   plain_explanation: true,
   how_to_use: true,
@@ -57,7 +58,7 @@ export async function getConfig(
   const existing = await storage.get<ProjectConfig>(configKey(repoSlug));
   if (existing) return existing;
 
-  const now = new Date().toISOString();
+  const now = nowIso();
   const config: ProjectConfig = { ...DEFAULTS, readme_sections: { ...DEFAULT_README_SECTIONS }, created_at: now, updated_at: now };
   await storage.set(configKey(repoSlug), config);
   return config;
@@ -72,7 +73,7 @@ export async function setConfig(
   const updated: ProjectConfig = {
     ...existing,
     ...partial,
-    updated_at: new Date().toISOString(),
+    updated_at: nowIso(),
   };
   await storage.set(configKey(repoSlug), updated);
   return updated;

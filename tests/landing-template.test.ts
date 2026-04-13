@@ -95,17 +95,27 @@ describe('generateLandingPage', () => {
 
   it('defaults to en lang visibility when language_mode is en', () => {
     const html = generateLandingPage({ ...base, language_mode: 'en' });
-    expect(html).toContain("||'en'");
+    expect(html).toContain('||"en"');
   });
 
   it('defaults to ko lang visibility when language_mode is ko', () => {
     const html = generateLandingPage({ ...base, language_mode: 'ko' });
-    expect(html).toContain("||'ko'");
+    expect(html).toContain('||"ko"');
   });
 
   it('shows both by default when language_mode is both', () => {
     const html = generateLandingPage({ ...base, language_mode: 'both' });
-    expect(html).toContain("||'both'");
+    expect(html).toContain('||"both"');
+  });
+
+  it('normalizes unexpected language_mode values before embedding in script', () => {
+    const html = generateLandingPage({
+      ...base,
+      language_mode: 'en";window.__LANG_XSS__=1;//' as LandingData['language_mode'],
+    });
+
+    expect(html).toContain('||"en"');
+    expect(html).not.toContain('window.__LANG_XSS__');
   });
 
   it('produces valid HTML5 doctype', () => {

@@ -1,7 +1,7 @@
 // @TASK P2-S4-T1, P2-S5-T1, P2-S6-T1 - Write Screens Display Tests
 // @TEST tests/write-screens-display.test.ts
 
-import { rm, mkdtemp } from 'node:fs/promises';
+import { readFile, rm, mkdtemp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -21,7 +21,6 @@ vi.mock('../src/resources/code-analyzer.js', () => ({
 vi.mock('../src/llm/index.js', () => ({
   createLLMProvider: vi.fn().mockResolvedValue({
     generateSummary: vi.fn().mockResolvedValue('A mock summary.'),
-    generatePainPoints: vi.fn().mockResolvedValue([]),
   }),
 }));
 
@@ -71,8 +70,8 @@ describe('runProgress', () => {
     expect(analyzeProject).toHaveBeenCalledWith(tmpDir);
     expect(generateProjectSummary).toHaveBeenCalled();
     expect(result.files_analyzed).toEqual(['index.ts', 'package.json', 'tsconfig.json']);
-    expect(result.readme_lines).toBeGreaterThan(0);
-    expect(result.landing_page_url).toBe('https://owner.github.io/test-repo');
+    expect(result.readme_lines).toBe((await readFile(join(tmpDir, 'README.md'), 'utf8')).split('\n').length);
+    expect(result.landing_page_url).toBe('https://owner.github.io/test-repo/');
   });
 
   it('skips landing steps when landing_page_enabled=false', async () => {
@@ -83,6 +82,7 @@ describe('runProgress', () => {
 
     expect(analyzeProject).toHaveBeenCalled();
     expect(result.landing_page_url).toBeUndefined();
+    await expect(readFile(join(tmpDir, 'README.md'), 'utf8')).resolves.toContain('A mock summary.');
   });
 });
 

@@ -8,6 +8,10 @@ import { buildPrompt } from './prompts.js';
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o-mini';
 
+interface OpenAIResponse {
+  choices: Array<{ message: { content: string } }>;
+}
+
 function getApiKey(): string {
   const key = process.env['OPENAI_API_KEY'];
   if (!key) throw new NerdSpecsError('ERR_LLM_UNAVAILABLE');
@@ -34,24 +38,15 @@ async function callOpenAI(prompt: string): Promise<string> {
     });
   }
 
-  const data = (await res.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
+  return parseOpenAIResponse((await res.json()) as OpenAIResponse);
+}
+
+function parseOpenAIResponse(data: OpenAIResponse): string {
   return data.choices[0]?.message?.content ?? '';
 }
 
 export class OpenAIProvider implements LLMProvider {
   async generateSummary(context: SummaryContext): Promise<string> {
     return callOpenAI(buildPrompt(context));
-  }
-
-  async generatePainPoints(motivation: string): Promise<string[]> {
-    const prompt = `List exactly 3 challenges a non-developer might face with this project type: "${motivation}". Format as a simple list of short phrases.`;
-    const raw = await callOpenAI(prompt);
-    return raw
-      .split('\n')
-      .map((l) => l.replace(/^[-\d.)\s]+/, '').trim())
-      .filter(Boolean)
-      .slice(0, 3);
   }
 }

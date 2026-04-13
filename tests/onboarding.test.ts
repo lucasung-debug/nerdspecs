@@ -84,4 +84,20 @@ describe('runOnboarding', () => {
     const prefs = await getPreferences(adapter);
     expect(prefs.language).toBe('both');
   });
+
+  it('prints numbered setup steps and quick-reference commands', async () => {
+    const inquirer = await import('inquirer');
+    vi.mocked(inquirer.default.prompt).mockResolvedValue({ selected: 'English' });
+
+    await runOnboarding(adapter);
+
+    const output = vi.mocked(console.log).mock.calls.map((call) => String(call[0])).join('\n');
+    expect(output).toContain('Step 1/4');
+    expect(output).toContain('Step 2/4');
+    expect(output).toContain('Step 3/4');
+    expect(output).toContain('Step 4/4');
+    expect(output).toContain('nerdspecs write');
+    expect(output).toContain('nerdspecs read');
+    expect(output).toContain('nerdspecs status');
+  });
 });

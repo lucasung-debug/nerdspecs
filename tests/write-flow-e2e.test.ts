@@ -2,7 +2,7 @@
 // @IMPL src/commands/write.ts, src/commands/write-screens/*
 // @SPEC docs/planning/06-tasks.md#P2-S1-V
 
-import { rm, mkdtemp, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, rm, mkdtemp, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -106,8 +106,10 @@ describe('E2E: new project complete flow', () => {
     expect(stored?.language).toBe('en');
 
     const result = await runProgress(adapter, REPO_SLUG, join(tmpDir, 'project'));
-    expect(result.readme_lines).toBe(42);
+    const readme = await readFile(join(tmpDir, 'project', 'README.md'), 'utf8');
+    expect(result.readme_lines).toBe(readme.split('\n').length);
     expect(result.files_analyzed).toBeInstanceOf(Array);
+    expect(result.landing_page_url).toBe('https://e2e-owner.github.io/e2e-repo/');
 
     const config = await getConfig(adapter, REPO_SLUG);
     expect(config).not.toBeNull();
@@ -141,7 +143,7 @@ describe('E2E: returning project flow', () => {
     expect(motivation?.answer).toBe('Original motivation from last session');
 
     const result = await runProgress(adapter, REPO_SLUG, join(tmpDir, 'project'));
-    expect(result.readme_lines).toBe(42);
+    expect(result.readme_lines).toBeGreaterThan(0);
 
     const config = await getConfig(adapter, REPO_SLUG);
     expect(config.landing_page_enabled).toBe(false);

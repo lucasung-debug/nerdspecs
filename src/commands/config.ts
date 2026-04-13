@@ -17,24 +17,30 @@ interface ConfigOptions {
 function parseLanguage(value?: string): ProjectConfig['language'] | undefined {
   if (!value) return undefined;
   if (value === 'en' || value === 'ko' || value === 'both') return value;
-  throw new Error('Invalid --language value. Use en, ko, or both.');
+  throw new Error(`Invalid --language value "${value}". Valid values: en, ko, both.`);
 }
 
 function parseBoolean(value: string | undefined, flag: string): boolean | undefined {
   if (!value) return undefined;
   if (value === 'true') return true;
   if (value === 'false') return false;
-  throw new Error(`Invalid ${flag} value. Use true or false.`);
+  throw new Error(`Invalid ${flag} value "${value}". Valid values: true, false.`);
+}
+
+function configKeyLabel(name: string, removable = false): string {
+  return removable ? `${name} [change] [remove]` : `${name} [change]`;
 }
 
 function printConfig(config: ProjectConfig): void {
-  console.log(formatStatusRow('language', config.language));
-  console.log(formatStatusRow('auto_push', config.auto_push));
-  console.log(formatStatusRow('landing_page_enabled', config.landing_page_enabled));
-  console.log(formatStatusRow('landing_page_url', config.landing_page_url ?? null));
-  console.log(formatStatusRow('hook_installed', config.hook_installed));
-  console.log(formatStatusRow('hook_installed_at', config.hook_installed_at ?? null));
-  console.log(formatStatusRow('readme_sections', Object.entries(config.readme_sections).filter(([, enabled]) => enabled).map(([name]) => name).join(', ')));
+  console.log(formatStatusRow(configKeyLabel('language'), config.language));
+  console.log(formatStatusRow(configKeyLabel('auto_push'), config.auto_push));
+  console.log(formatStatusRow(configKeyLabel('landing_page_enabled'), config.landing_page_enabled));
+  console.log(formatStatusRow(configKeyLabel('landing_page_url', true), config.landing_page_url ?? '[not yet generated]'));
+  console.log(formatStatusRow(configKeyLabel('hook_installed'), config.hook_installed));
+  console.log(formatStatusRow(configKeyLabel('hook_installed_at', true), config.hook_installed_at ?? '[not recorded]'));
+  console.log(formatStatusRow(configKeyLabel('readme_sections'), Object.entries(config.readme_sections).filter(([, enabled]) => enabled).map(([name]) => name).join(', ')));
+  console.log(formatStatusRow('created_at', config.created_at));
+  console.log(formatStatusRow('updated_at', config.updated_at));
 }
 
 function definedConfigUpdates(

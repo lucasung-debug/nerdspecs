@@ -1,7 +1,7 @@
 // @TASK P2-R5-T2 - LLM Provider Tests
 // @TEST tests/llm.test.ts
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { MockProvider } from '../src/llm/mock-provider.js';
 import { createLLMProvider } from '../src/llm/index.js';
 import { generateProjectSummary } from '../src/generators/summary.js';
@@ -39,16 +39,6 @@ describe('MockProvider', () => {
     }
   });
 
-  it('generatePainPoints returns exactly 3 items', async () => {
-    const points = await mock.generatePainPoints('web application');
-    expect(points).toHaveLength(3);
-  });
-
-  it('generatePainPoints returns non-empty strings', async () => {
-    const points = await mock.generatePainPoints('sell products online');
-    points.forEach((p) => expect(p.length).toBeGreaterThan(0));
-  });
-
   it('generateSummary includes framework clause when framework provided', async () => {
     const result = await mock.generateSummary(sampleContext);
     expect(result).toContain('express');
@@ -83,10 +73,12 @@ describe('createLLMProvider', () => {
   });
 
   it('returns MockProvider when no API keys are set', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const provider = await createLLMProvider();
     const result = await provider.generateSummary(sampleContext);
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(0);
+    expect(warn).toHaveBeenCalledWith('⚠ No API key found. Using offline mode — summaries will be template-based.');
   });
 });
 

@@ -12,5 +12,4 @@ export interface SummaryContext {
 
 export interface LLMProvider {
   generateSummary(context: SummaryContext): Promise<string>;
-  generatePainPoints(motivation: string): Promise<string[]>;
 }

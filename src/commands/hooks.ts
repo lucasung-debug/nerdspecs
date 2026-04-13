@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { NerdSpecsError } from '../errors.js';
 import { setConfig, type ProjectConfig } from '../resources/project-config.js';
 import type { StorageAdapter } from '../storage/adapter.js';
+import { nowIso } from '../utils.js';
 
 const HOOK_COMMAND = 'npx nerdspecs write --auto';
 
@@ -52,6 +53,6 @@ export async function installPostPushHook(
   await setExecutable(path);
   return setConfig(storage, repoSlug, {
     hook_installed: true,
-    hook_installed_at: new Date().toISOString(),
+    hook_installed_at: nowIso(),
   });
 }
