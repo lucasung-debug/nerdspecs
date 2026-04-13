@@ -3,7 +3,16 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(xargs wc:*)",
-      "Bash(ls -la /c/Users/propo/Desktop/NerdSpecs/*.json /c/Users/propo/Desktop/NerdSpecs/*.md)"
+      "Bash(ls -la /c/Users/propo/Desktop/NerdSpecs/*.json /c/Users/propo/Desktop/NerdSpecs/*.md)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(grep -E \"^execa$\")",
+      "Bash(node bin/nerdspecs.js --help)",
+      "Bash(git worktree:*)",
+      "Bash(npm show:*)",
+      "Bash(git -C /c/Users/propo/Desktop/NerdSpecs log --oneline -3)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
