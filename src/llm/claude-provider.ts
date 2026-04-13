@@ -1,0 +1,69 @@
+// @TASK P2-R5-T2 - Claude API Adapter
+// @SPEC docs/planning/06-tasks.md
+
+import type { LLMProvider, SummaryContext } from './provider.js';
+
+const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
+const MODEL = 'claude-sonnet-4-20250514';
+
+function getApiKey(): string {
+  const key = process.env['ANTHROPIC_API_KEY'] ?? process.env['CLAUDE_API_KEY'];
+  if (!key) {
+    throw new Error(
+      'No Claude API key found. Set ANTHROPIC_API_KEY or CLAUDE_API_KEY environment variable.'
+    );
+  }
+  return key;
+}
+
+function buildPrompt(context: SummaryContext): string {
+  const deps = context.dependencies.slice(0, 5).join(', ');
+  const framework = context.framework ? ` using ${context.framework}` : '';
+  return `Explain this project as if talking to someone who has never coded. Keep it friendly and simple (2-3 sentences max).
+
+Project: ${context.project_name}
+Language: ${context.primary_language}${framework}
+Key tools: ${deps}
+${context.motivation ? `Purpose: ${context.motivation}` : ''}`;
+}
+
+async function callClaude(prompt: string): Promise<string> {
+  const res = await fetch(CLAUDE_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 256,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Claude API error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = (await res.json()) as {
+    content: Array<{ type: string; text: string }>;
+  };
+  return data.content[0]?.text ?? '';
+}
+
+export class ClaudeProvider implements LLMProvider {
+  async generateSummary(context: SummaryContext): Promise<string> {
+    return callClaude(buildPrompt(context));
+  }
+
+  async generatePainPoints(motivation: string): Promise<string[]> {
+    const prompt = `List exactly 3 challenges a non-developer might face with this project type: "${motivation}". Format as a simple list of short phrases.`;
+    const raw = await callClaude(prompt);
+    return raw
+      .split('\n')
+      .map((l) => l.replace(/^[-\d.)\s]+/, '').trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+}
