@@ -20,15 +20,16 @@ vi.mock('../src/resources/project-config.js', async (importOriginal) => {
   };
 });
 
-vi.mock('../src/resources/project-metadata.js', () => ({
+vi.mock('../src/resources/code-analyzer.js', () => ({
   analyzeProject: vi.fn().mockResolvedValue({
-    detected_language: 'TypeScript',
+    primary_language: 'TypeScript',
     detected_framework: 'Express',
     entry_file: 'index.ts',
+    dependency_count: 3,
+    dependencies: ['express', 'chalk', 'commander'],
+    core_files: ['index.ts', 'package.json'],
+    tech_stack: { language: 'TypeScript', frameworks: ['Express'], apis: [], services: [] },
   }),
-  getMetadata: vi.fn().mockResolvedValue(null),
-  setMetadata: vi.fn().mockResolvedValue(undefined),
-  deleteMetadata: vi.fn().mockResolvedValue(undefined),
 }));
 
 import { LocalFileAdapter } from '../src/storage/local-file-adapter.js';

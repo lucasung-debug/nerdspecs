@@ -18,7 +18,12 @@
       "Bash(npx tsc:*)",
       "Bash(node:*)",
       "Bash(npx vitest:*)",
-      "mcp__codex__codex"
+      "mcp__codex__codex",
+      "Bash(find src:*)",
+      "Bash(npm audit:*)",
+      "Bash(grep -rn \"catch\\\\s*{\\\\s*$\" src/ --include=\"*.ts\")",
+      "Bash(npm list:*)",
+      "Bash(npm ls:*)"
     ]
   }
 }

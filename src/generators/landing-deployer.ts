@@ -5,6 +5,7 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { StorageAdapter } from '../storage/adapter.js';
 import { setConfig } from '../resources/project-config.js';
+import { validatePath } from '../utils.js';
 
 function parseOwnerRepo(repoSlug: string): { owner: string; repo: string } {
   const sep = repoSlug.indexOf('--');
@@ -23,9 +24,10 @@ export async function deployLandingPage(
   repoSlug: string,
   storage?: StorageAdapter,
 ): Promise<{ path: string; url: string }> {
-  const docsDir = join(projectDir, 'docs');
+  const projectRoot = validatePath(projectDir, '.');
+  const docsDir = validatePath(projectRoot, 'docs');
   await mkdir(docsDir, { recursive: true });
-  const path = join(docsDir, 'index.html');
+  const path = validatePath(projectRoot, join('docs', 'index.html'));
   await writeFile(path, html, 'utf8');
   const url = deriveUrl(repoSlug);
   if (storage) {

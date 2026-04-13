@@ -43,14 +43,6 @@ function getPurposeGuess(framework?: string): string {
   return FRAMEWORK_PURPOSE[key] ?? 'helps accomplish a specific goal';
 }
 
-function getPainPoints(framework?: string): string[] {
-  if (!framework) return FRAMEWORK_PAIN_POINTS['web']!;
-  const key = framework.toLowerCase();
-  if (['react', 'vue', 'svelte'].includes(key)) return FRAMEWORK_PAIN_POINTS['ui']!;
-  if (['express', 'fastapi', 'flask', 'fastify', 'hapi', 'koa'].includes(key)) return FRAMEWORK_PAIN_POINTS['api']!;
-  return FRAMEWORK_PAIN_POINTS['web']!;
-}
-
 export class MockProvider implements LLMProvider {
   async generateSummary(context: SummaryContext): Promise<string> {
     const frameworkClause = context.framework ? ` built with ${context.framework}` : '';

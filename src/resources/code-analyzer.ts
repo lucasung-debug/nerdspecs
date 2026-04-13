@@ -1,7 +1,7 @@
 // @TASK P2-R5-T1 - Code Analyzer Engine
 // @SPEC docs/planning/06-tasks.md#P2-R5-T1
 import { readdir, readFile } from 'node:fs/promises';
-import { join, extname, basename } from 'node:path';
+import { join, extname, basename, relative } from 'node:path';
 
 export interface AnalysisResult {
   primary_language: string;
@@ -183,7 +183,7 @@ function selectCoreFiles(dir: string, files: string[], limit = 20): string[] {
     return ENTRY_CANDIDATES.some(c => f.endsWith(c)) || configNames.has(name);
   });
   const rest = files.filter(f => !priority.includes(f));
-  return [...priority, ...rest].slice(0, limit).map(f => f.replace(dir + '/', '').replace(dir + '\\', ''));
+  return [...priority, ...rest].slice(0, limit).map((file) => relative(dir, file));
 }
 
 export async function analyzeProject(projectDir: string): Promise<AnalysisResult> {

@@ -170,6 +170,13 @@ describe('Core Files', () => {
     const result = await analyzeProject(projectDir);
     expect(result.core_files.some(f => f.includes('node_modules'))).toBe(false);
   });
+
+  it('returns relative nested paths in core_files', async () => {
+    await makeReactProject(projectDir);
+    const result = await analyzeProject(projectDir);
+    expect(result.core_files).toContain(join('src', 'index.tsx'));
+    expect(result.core_files.every((file) => !file.startsWith(projectDir))).toBe(true);
+  });
 });
 
 describe('Tech Stack', () => {

@@ -1,21 +1,17 @@
 import { Command } from 'commander';
-import { basename } from 'node:path';
 import { formatStatusRow } from '../components/index.js';
 import { wrapCommand } from '../errors.js';
 import { createStorageAdapter } from '../storage/auto-detect.js';
 import { installPostPushHook } from './hooks.js';
-import { deriveRepoSlug, getConfig, setConfig, type ProjectConfig } from '../resources/project-config.js';
+import { getConfig, setConfig, type ProjectConfig } from '../resources/project-config.js';
 import type { StorageAdapter } from '../storage/adapter.js';
+import { resolveCurrentRepoSlug } from './helpers.js';
 
 interface ConfigOptions {
   language?: string;
   autoPush?: string;
   landing?: string;
   installHook?: boolean;
-}
-
-async function repoSlug(): Promise<string> {
-  try { return await deriveRepoSlug(); } catch { return basename(process.cwd()); }
 }
 
 function parseLanguage(value?: string): ProjectConfig['language'] | undefined {
@@ -73,7 +69,7 @@ export async function runConfigCommand(
   slug?: string,
   projectDir: string = process.cwd(),
 ): Promise<ProjectConfig> {
-  const currentSlug = slug ?? await repoSlug();
+  const currentSlug = slug ?? await resolveCurrentRepoSlug();
   const config = await applyConfigChanges(storage, currentSlug, options, projectDir);
   printConfig(config);
   if (options.installHook) console.log('Installed post-push hook: npx nerdspecs write --auto');

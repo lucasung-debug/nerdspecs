@@ -1,4 +1,5 @@
 import type { StorageAdapter } from '../storage/adapter.js';
+import { nowIso } from '../utils.js';
 
 export type Decision = 'adopt' | 'skip' | 'watch' | 'undecided';
 export type DecisionStatus = 'active' | 'superseded' | 'archived';
@@ -31,10 +32,6 @@ const VAGUE_PATTERNS = [
 
 function decisionKey(key: string): string {
   return `decision_record::${key}`;
-}
-
-function nowIso(): string {
-  return new Date().toISOString();
 }
 
 function combinedText(data: Pick<DecisionRecordInput, 'reasoning' | 'follow_up_answer'>): string {

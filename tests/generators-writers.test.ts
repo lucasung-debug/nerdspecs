@@ -49,6 +49,11 @@ describe('writeReadme', () => {
     expect(written).toContain('New content');
     expect(written).not.toContain('Old generated content');
   });
+
+  it('normalizes README path inside the project root', async () => {
+    const result = await writeReadme(join(tmpDir, '.', 'nested', '..'), '# Normalized\n');
+    expect(result.path).toBe(join(tmpDir, 'README.md'));
+  });
 });
 
 describe('deployLandingPage', () => {
@@ -71,5 +76,10 @@ describe('deployLandingPage', () => {
   it('derives correct GitHub Pages URL from repoSlug', async () => {
     const { url } = await deployLandingPage(tmpDir, '', 'johndoe--my-project');
     expect(url).toBe('https://johndoe.github.io/my-project/');
+  });
+
+  it('normalizes docs path inside the project root', async () => {
+    const result = await deployLandingPage(join(tmpDir, '.', 'site', '..'), '<html></html>', 'owner--repo');
+    expect(result.path).toBe(join(tmpDir, 'docs', 'index.html'));
   });
 });

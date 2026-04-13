@@ -11,17 +11,59 @@ export interface LandingData {
   language_mode: 'en' | 'ko' | 'both';
 }
 
-function buildNav(data: LandingData): string {
+interface SafeLandingData extends Omit<LandingData, 'project_name' | 'summary' | 'pain_points' | 'tech_stack'> {
+  project_name: string;
+  summary: string;
+  pain_points: string[];
+  tech_stack: { language: string; frameworks: string[] };
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+function normalizeRepoUrl(repoUrl?: string): string | undefined {
+  if (!repoUrl) return undefined;
+
+  try {
+    const parsed = new URL(repoUrl);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
+    return parsed.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function sanitizeData(data: LandingData): SafeLandingData {
+  return {
+    ...data,
+    project_name: escapeHtml(data.project_name),
+    summary: escapeHtml(data.summary),
+    pain_points: data.pain_points.map((painPoint) => escapeHtml(painPoint)),
+    tech_stack: {
+      language: escapeHtml(data.tech_stack.language),
+      frameworks: data.tech_stack.frameworks.map((framework) => escapeHtml(framework)),
+    },
+    repo_url: normalizeRepoUrl(data.repo_url),
+  };
+}
+
+function buildNav(data: SafeLandingData): string {
   const link = data.repo_url
-    ? `<a href="${data.repo_url}" class="nav-link" target="_blank" rel="noopener">GitHub</a>`
+    ? `<a href="${escapeHtml(data.repo_url)}" class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>`
     : '';
   const toggle = `<button class="lang-toggle" onclick="cycleLang()" aria-label="Language toggle">EN | KO</button>`;
   return `<nav id="nav"><span class="nav-brand">${data.project_name}</span><div class="nav-right">${link}${toggle}</div></nav>`;
 }
 
-function buildHero(data: LandingData): string {
+function buildHero(data: SafeLandingData): string {
   const cta = data.repo_url
-    ? `<a href="${data.repo_url}" class="btn-cta" target="_blank" rel="noopener"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub에서 보기</span></a>`
+    ? `<a href="${escapeHtml(data.repo_url)}" class="btn-cta" target="_blank" rel="noopener noreferrer"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub에서 보기</span></a>`
     : '';
   return `<section id="hero">
   <div data-lang="en"><h1>${data.project_name}</h1><p class="hero-summary">${data.summary}</p>${cta}</div>
@@ -33,7 +75,7 @@ function buildPainCard(text: string): string {
   return `<div class="pain-card"><p data-lang="en">${text}</p><p data-lang="ko">${text}</p></div>`;
 }
 
-function buildProblem(data: LandingData): string {
+function buildProblem(data: SafeLandingData): string {
   const cards = data.pain_points.map(buildPainCard).join('');
   return `<section id="problem">
   <h2 data-lang="en">Sound familiar?</h2>
@@ -85,7 +127,7 @@ function buildHowTo(): string {
 </section>`;
 }
 
-function buildTechFooter(data: LandingData): string {
+function buildTechFooter(data: SafeLandingData): string {
   const fw = data.tech_stack.frameworks.join(', ');
   return `<footer id="tech-footer">
   <p data-lang="en">Built with ${data.tech_stack.language}${fw ? ` · ${fw}` : ''}</p>
@@ -154,16 +196,18 @@ showLang(localStorage.getItem('nerdspecs-lang')||'${mode}');
 }
 
 export function generateLandingPage(data: LandingData): string {
+  const safeData = sanitizeData(data);
+
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${data.project_name}</title>${buildCSS()}</head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeData.project_name}</title>${buildCSS()}</head>
 <body>
-${buildNav(data)}
-${buildHero(data)}
-${buildProblem(data)}
+${buildNav(safeData)}
+${buildHero(safeData)}
+${buildProblem(safeData)}
 ${buildSolution()}
 ${buildHowTo()}
-${buildTechFooter(data)}
+${buildTechFooter(safeData)}
 ${buildScript(data.language_mode)}
 </body>
 </html>`;

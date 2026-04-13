@@ -1,17 +1,13 @@
 import { Command } from 'commander';
-import { basename } from 'node:path';
 import { formatStatusRow } from '../components/index.js';
 import { wrapCommand } from '../errors.js';
-import { deriveRepoSlug, type ProjectConfig } from '../resources/project-config.js';
+import { type ProjectConfig } from '../resources/project-config.js';
 import type { ProjectMetadata } from '../resources/project-metadata.js';
 import type { ProjectMotivation } from '../resources/project-motivation.js';
 import type { UserPreferences } from '../resources/user-preferences.js';
 import type { StorageAdapter } from '../storage/adapter.js';
 import { createStorageAdapter } from '../storage/auto-detect.js';
-
-async function repoSlug(): Promise<string> {
-  try { return await deriveRepoSlug(); } catch { return basename(process.cwd()); }
-}
+import { resolveCurrentRepoSlug } from './helpers.js';
 
 async function recordCount(storage: StorageAdapter): Promise<number> {
   return (await storage.list('decision_record::')).length;
@@ -38,7 +34,7 @@ async function loadStatusData(storage: StorageAdapter, slug: string): Promise<[
 }
 
 export async function runStatusCommand(storage: StorageAdapter, slug?: string): Promise<void> {
-  const currentSlug = slug ?? await repoSlug();
+  const currentSlug = slug ?? await resolveCurrentRepoSlug();
   const [config, metadata, motivation, preferences, decisions] = await loadStatusData(storage, currentSlug);
   printSection('Project info');
   console.log(formatStatusRow('Project', metadata?.display_name ?? currentSlug));

@@ -21,18 +21,6 @@ vi.mock('../src/resources/project-config.js', async (importOriginal) => {
   };
 });
 
-vi.mock('../src/resources/project-metadata.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/resources/project-metadata.js')>();
-  return {
-    ...actual,
-    analyzeProject: vi.fn().mockResolvedValue({
-      detected_language: 'TypeScript',
-      detected_framework: 'Express',
-      entry_file: 'index.ts',
-    }),
-  };
-});
-
 vi.mock('../src/resources/code-analyzer.js', () => ({
   analyzeProject: vi.fn().mockResolvedValue({
     primary_language: 'TypeScript',

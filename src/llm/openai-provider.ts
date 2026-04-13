@@ -3,6 +3,7 @@
 
 import { NerdSpecsError } from '../errors.js';
 import type { LLMProvider, SummaryContext } from './provider.js';
+import { buildPrompt } from './prompts.js';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o-mini';
@@ -11,17 +12,6 @@ function getApiKey(): string {
   const key = process.env['OPENAI_API_KEY'];
   if (!key) throw new NerdSpecsError('ERR_LLM_UNAVAILABLE');
   return key;
-}
-
-function buildPrompt(context: SummaryContext): string {
-  const deps = context.dependencies.slice(0, 5).join(', ');
-  const framework = context.framework ? ` using ${context.framework}` : '';
-  return `Explain this project as if talking to someone who has never coded. Keep it friendly and simple (2-3 sentences max).
-
-Project: ${context.project_name}
-Language: ${context.primary_language}${framework}
-Key tools: ${deps}
-${context.motivation ? `Purpose: ${context.motivation}` : ''}`;
 }
 
 async function callOpenAI(prompt: string): Promise<string> {

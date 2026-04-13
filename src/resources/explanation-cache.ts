@@ -1,4 +1,5 @@
 import type { StorageAdapter } from '../storage/adapter.js';
+import { nowIso } from '../utils.js';
 
 export type ComplexityLevel = 'beginner' | 'intermediate' | 'advanced';
 
@@ -21,10 +22,6 @@ const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function cacheKey(key: string): string {
   return `explanation_cache::${key}`;
-}
-
-function nowIso(): string {
-  return new Date().toISOString();
 }
 
 export function isStale(cache: ExplanationCache | null): boolean {
