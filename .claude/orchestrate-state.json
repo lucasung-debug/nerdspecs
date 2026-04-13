@@ -1,0 +1,17 @@
+{
+  "project": "NerdSpecs",
+  "started_at": "2026-04-13T22:10:00+09:00",
+  "current_phase": "P0",
+  "total_tasks": 37,
+  "completed_tasks": [],
+  "failed_tasks": [],
+  "skipped_tasks": [],
+  "phase_status": {
+    "P0": "in_progress",
+    "P1": "pending",
+    "P2": "pending",
+    "P3": "pending",
+    "P4": "pending",
+    "P5": "pending"
+  }
+}
