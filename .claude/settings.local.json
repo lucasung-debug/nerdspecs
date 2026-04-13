@@ -16,7 +16,9 @@
       "Bash(node -e ':*)",
       "Bash(node -e \"import\\('/c/Users/propo/Desktop/NerdSpecs/src/generators/landing-template.js'\\).catch\\(\\(\\)=>{}\\)\")",
       "Bash(npx tsc:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npx vitest:*)",
+      "mcp__codex__codex"
     ]
   }
 }
