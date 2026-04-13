@@ -1,6 +1,7 @@
 // @TASK P2-R5-T2 - OpenAI API Adapter
 // @SPEC docs/planning/06-tasks.md
 
+import { NerdSpecsError } from '../errors.js';
 import type { LLMProvider, SummaryContext } from './provider.js';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
@@ -8,11 +9,7 @@ const MODEL = 'gpt-4o-mini';
 
 function getApiKey(): string {
   const key = process.env['OPENAI_API_KEY'];
-  if (!key) {
-    throw new Error(
-      'No OpenAI API key found. Set OPENAI_API_KEY environment variable.'
-    );
-  }
+  if (!key) throw new NerdSpecsError('ERR_LLM_UNAVAILABLE');
   return key;
 }
 
@@ -42,7 +39,9 @@ async function callOpenAI(prompt: string): Promise<string> {
   });
 
   if (!res.ok) {
-    throw new Error(`OpenAI API error: ${res.status} ${res.statusText}`);
+    throw new NerdSpecsError('ERR_LLM_UNAVAILABLE', {
+      message: `OpenAI API error: ${res.status} ${res.statusText}`,
+    });
   }
 
   const data = (await res.json()) as {

@@ -125,16 +125,10 @@ describe('runSuccess', () => {
 });
 
 describe('runAutoMode', () => {
-  it('exits with code 1 and prints message when no motivation stored', async () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
-    const consoleSpy = vi.spyOn(console, 'log');
-
-    await runAutoMode(adapter, REPO_SLUG, tmpDir);
-
-    expect(consoleSpy).toHaveBeenCalledWith(
-      'NerdSpecs: No motivation stored. Run `nerdspecs write` first.',
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
+  it('throws a friendly error when no motivation is stored', async () => {
+    await expect(runAutoMode(adapter, REPO_SLUG, tmpDir)).rejects.toMatchObject({
+      code: 'ERR_NO_MOTIVATION',
+    });
   });
 
   it('prints exactly 2 lines on success with landing enabled', async () => {
@@ -162,19 +156,11 @@ describe('runAutoMode', () => {
     expect(lines[0]).toContain('README.md updated');
   });
 
-  it('exits with code 1 and single error line on exception', async () => {
+  it('surfaces underlying exceptions to the command boundary', async () => {
     await setMotivation(adapter, REPO_SLUG, 'test motivation');
     const { analyzeProject } = await import('../src/resources/code-analyzer.js');
     vi.mocked(analyzeProject).mockRejectedValueOnce(new Error('disk error'));
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
-    const consoleSpy = vi.spyOn(console, 'log');
-
-    await runAutoMode(adapter, REPO_SLUG, tmpDir);
-
-    const lines = consoleSpy.mock.calls.map(c => String(c[0]));
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toBe('NerdSpecs: Failed — disk error');
-    expect(exitSpy).toHaveBeenCalledWith(1);
+    await expect(runAutoMode(adapter, REPO_SLUG, tmpDir)).rejects.toThrow('disk error');
   });
 });

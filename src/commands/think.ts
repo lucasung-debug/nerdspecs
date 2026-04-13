@@ -1,6 +1,7 @@
 import { Command } from 'commander';
-import { LocalFileAdapter } from '../storage/local-file-adapter.js';
+import { wrapCommand } from '../errors.js';
 import type { StorageAdapter } from '../storage/adapter.js';
+import { createStorageAdapter } from '../storage/auto-detect.js';
 import { isVagueAnswer } from '../resources/decision-record.js';
 import type { ExplanationCache } from '../resources/explanation-cache.js';
 import { runUrlInput } from './read-screens/url-input.js';
@@ -20,18 +21,16 @@ export async function runThinkFlow(storage: StorageAdapter, cache: ExplanationCa
   await runDecisionSaved(storage, cache, reasoning, followUpAnswer);
 }
 
+export async function runThinkCommand(initialUrl?: string): Promise<void> {
+  const storage = await createStorageAdapter();
+  await runThinkFlow(storage, await resolveCache(storage, initialUrl));
+}
+
 export function registerThinkCommand(program: Command): void {
   program
     .command('think [url]')
     .description('Record why you need a project (v0.2)')
-    .action(async (url) => {
-      try {
-        const storage = new LocalFileAdapter();
-        await runThinkFlow(storage, await resolveCache(storage, url));
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(`NerdSpecs error: ${message}`);
-        process.exit(1);
-      }
-    });
+    .action(wrapCommand(async (url) => {
+      await runThinkCommand(url as string | undefined);
+    }));
 }

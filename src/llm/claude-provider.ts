@@ -1,6 +1,7 @@
 // @TASK P2-R5-T2 - Claude API Adapter
 // @SPEC docs/planning/06-tasks.md
 
+import { NerdSpecsError } from '../errors.js';
 import type { LLMProvider, SummaryContext } from './provider.js';
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -8,11 +9,7 @@ const MODEL = 'claude-sonnet-4-20250514';
 
 function getApiKey(): string {
   const key = process.env['ANTHROPIC_API_KEY'] ?? process.env['CLAUDE_API_KEY'];
-  if (!key) {
-    throw new Error(
-      'No Claude API key found. Set ANTHROPIC_API_KEY or CLAUDE_API_KEY environment variable.'
-    );
-  }
+  if (!key) throw new NerdSpecsError('ERR_LLM_UNAVAILABLE');
   return key;
 }
 
@@ -43,7 +40,9 @@ async function callClaude(prompt: string): Promise<string> {
   });
 
   if (!res.ok) {
-    throw new Error(`Claude API error: ${res.status} ${res.statusText}`);
+    throw new NerdSpecsError('ERR_LLM_UNAVAILABLE', {
+      message: `Claude API error: ${res.status} ${res.statusText}`,
+    });
   }
 
   const data = (await res.json()) as {

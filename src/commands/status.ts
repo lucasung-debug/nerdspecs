@@ -1,12 +1,13 @@
 import { Command } from 'commander';
 import { basename } from 'node:path';
 import { formatStatusRow } from '../components/index.js';
+import { wrapCommand } from '../errors.js';
 import { deriveRepoSlug, type ProjectConfig } from '../resources/project-config.js';
 import type { ProjectMetadata } from '../resources/project-metadata.js';
 import type { ProjectMotivation } from '../resources/project-motivation.js';
 import type { UserPreferences } from '../resources/user-preferences.js';
 import type { StorageAdapter } from '../storage/adapter.js';
-import { LocalFileAdapter } from '../storage/local-file-adapter.js';
+import { createStorageAdapter } from '../storage/auto-detect.js';
 
 async function repoSlug(): Promise<string> {
   try { return await deriveRepoSlug(); } catch { return basename(process.cwd()); }
@@ -55,17 +56,15 @@ export async function runStatusCommand(storage: StorageAdapter, slug?: string): 
   console.log(formatStatusRow('Saved decisions', String(decisions)));
 }
 
+export async function runStatusCli(): Promise<void> {
+  await runStatusCommand(await createStorageAdapter());
+}
+
 export function registerStatusCommand(program: Command): void {
   program
     .command('status')
     .description('Show your NerdSpecs settings')
-    .action(async () => {
-      try {
-        await runStatusCommand(new LocalFileAdapter());
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(`NerdSpecs error: ${message}`);
-        process.exit(1);
-      }
-    });
+    .action(wrapCommand(async () => {
+      await runStatusCli();
+    }));
 }

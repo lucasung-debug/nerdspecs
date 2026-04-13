@@ -2,6 +2,7 @@
 // @SPEC docs/planning/06-tasks.md#P2-S7-T1
 
 import { Command } from 'commander';
+import { wrapCommand } from '../errors.js';
 import { createStorageAdapter } from '../storage/auto-detect.js';
 import { isOnboardingNeeded, runOnboarding } from './onboarding.js';
 import { runSetupCheck } from './write-screens/setup-check.js';
@@ -37,25 +38,23 @@ async function runAutoFlow(storage: StorageAdapter): Promise<void> {
   await runAutoMode(storage, repo_slug, process.cwd());
 }
 
+async function runSelectedFlow(storage: StorageAdapter, auto: boolean): Promise<void> {
+  if (auto) return runAutoFlow(storage);
+  await runInteractiveFlow(storage);
+}
+
+export async function runWriteCommand(options: { auto?: boolean } = {}): Promise<void> {
+  const storage = await createStorageAdapter();
+  await maybeOnboard(storage);
+  await runSelectedFlow(storage, Boolean(options.auto));
+}
+
 export function registerWriteCommand(program: Command): void {
   program
     .command('write')
     .description('Create docs for THIS project')
     .option('--auto', 'Auto mode (git hook trigger)')
-    .action(async (options) => {
-      try {
-        const storage = await createStorageAdapter();
-        await maybeOnboard(storage);
-
-        if (options.auto) {
-          await runAutoFlow(storage);
-        } else {
-          await runInteractiveFlow(storage);
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error(`NerdSpecs error: ${message}`);
-        process.exit(1);
-      }
-    });
+    .action(wrapCommand(async (options) => {
+      await runWriteCommand({ auto: Boolean(options.auto) });
+    }));
 }

@@ -6,26 +6,45 @@ import {
   registerThinkCommand,
   registerStatusCommand,
   registerConfigCommand,
+  runWriteCommand,
+  runReadCommand,
+  runThinkCommand,
+  runStatusCli,
+  runMainMenu,
 } from './commands/index.js';
+import { wrapCommand } from './errors.js';
+import { createStorageAdapter } from './storage/auto-detect.js';
 
 function printHeader(): void {
   console.log(chalk.yellow('  🤓 NerdSpecs v0.1.0'));
   console.log(chalk.gray('  Put on nerd glasses and the project becomes visible.\n'));
 }
 
-const program = new Command();
+async function runDefaultCommand(): Promise<void> {
+  await runMainMenu(await createStorageAdapter(), {
+    write: () => runWriteCommand(),
+    read: () => runReadCommand(),
+    think: () => runThinkCommand(),
+    status: () => runStatusCli(),
+  });
+}
 
-program
-  .name('nerdspecs')
-  .description('Put on nerd glasses and the project becomes visible.')
-  .version('0.1.0');
+export function createProgram(): Command {
+  const program = new Command();
+  program
+    .name('nerdspecs')
+    .description('Put on nerd glasses and the project becomes visible.')
+    .version('0.1.0');
+  program.hook('preAction', printHeader);
+  registerWriteCommand(program);
+  registerReadCommand(program);
+  registerThinkCommand(program);
+  registerStatusCommand(program);
+  registerConfigCommand(program);
+  program.action(wrapCommand(runDefaultCommand));
+  return program;
+}
 
-program.hook('preAction', printHeader);
-
-registerWriteCommand(program);
-registerReadCommand(program);
-registerThinkCommand(program);
-registerStatusCommand(program);
-registerConfigCommand(program);
-
-program.parse();
+export async function runCli(argv: string[] = process.argv): Promise<void> {
+  await createProgram().parseAsync(argv);
+}

@@ -184,14 +184,9 @@ describe('E2E: auto mode flow', () => {
   });
 
   it('exits when no motivation is stored', async () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code) => { throw new Error('process.exit'); });
-
     await expect(
       runAutoMode(adapter, REPO_SLUG, join(tmpDir, 'project'))
-    ).rejects.toThrow('process.exit');
-
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    ).rejects.toMatchObject({ code: 'ERR_NO_MOTIVATION' });
   });
 });
 

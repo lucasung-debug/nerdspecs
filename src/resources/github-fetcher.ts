@@ -1,3 +1,5 @@
+import { NerdSpecsError } from '../errors.js';
+
 const GITHUB_HOSTS = new Set(['github.com', 'www.github.com']);
 
 export interface RepoInfo {
@@ -56,7 +58,7 @@ export function parseGitHubUrl(url: string): { owner: string; repo: string } {
 }
 
 function githubError(status: number): Error {
-  if (status === 403 || status === 429) return new Error('GitHub API rate limit reached. Please try again later.');
+  if (status === 403 || status === 429) return new NerdSpecsError('ERR_GITHUB_RATE_LIMIT');
   if (status === 404) return new Error('Could not fetch repository from GitHub.');
   return new Error(`GitHub API request failed with status ${status}.`);
 }

@@ -1,6 +1,7 @@
-export { registerWriteCommand } from './write.js';
-export { registerReadCommand } from './read.js';
-export { registerThinkCommand } from './think.js';
-export { registerStatusCommand } from './status.js';
-export { registerConfigCommand } from './config.js';
+export { registerWriteCommand, runWriteCommand } from './write.js';
+export { registerReadCommand, runReadCommand } from './read.js';
+export { registerThinkCommand, runThinkCommand } from './think.js';
+export { registerStatusCommand, runStatusCli } from './status.js';
+export { registerConfigCommand, runConfigCli } from './config.js';
+export { MAIN_MENU_OPTIONS, runMainMenu, type MainMenuHandlers } from './menu.js';
 export { runOnboarding, isOnboardingNeeded } from './onboarding.js';
