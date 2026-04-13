@@ -1,0 +1,40 @@
+version: "2.0"
+project: NerdSpecs
+total_screens: 19
+
+groups:
+  - name: Main
+    screens: [skill-invocation]
+
+  - name: Write Flow
+    screens:
+      - write-setup-check
+      - write-one-question
+      - write-memory-confirm
+      - write-progress
+      - write-success
+      - write-auto-mode
+
+  - name: Read Flow
+    screens:
+      - read-url-input
+      - read-progress
+      - read-explanation
+
+  - name: Think Flow
+    screens:
+      - think-why-need
+      - think-follow-up
+      - think-decision-saved
+
+  - name: System
+    screens:
+      - status
+      - error-generic
+      - config
+      - onboarding
+
+  - name: Generated Outputs
+    screens:
+      - generated-readme
+      - generated-landing-page

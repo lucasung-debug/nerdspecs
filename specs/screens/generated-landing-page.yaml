@@ -1,0 +1,90 @@
+version: "2.0"
+
+screen:
+  name: 생성된 랜딩 페이지
+  route: "{repo_root}/docs/index.html"
+  layout: html-page
+
+data_requirements:
+  - resource: project_metadata
+    needs: [display_name, generated_summary, tech_stack]
+  - resource: project_motivation
+    needs: [answer]
+  - resource: project_config
+    needs: [landing_page_url, language]
+
+components:
+  - id: top_nav
+    type: nav_bar
+    position: top
+    function: "글래스 아이콘 + NerdSpecs, About, GitHub, 언어 토글 (ko/en)"
+    data_source:
+      resource: project_config
+
+  - id: hero_section
+    type: hero_section
+    position: top
+    function: 어두운 배경, 히어로 이미지, 프로젝트 이름, 한 줄 요약, CTA 버튼 2개
+    data_source:
+      resource: project_metadata
+
+  - id: pain_points
+    type: card_grid
+    position: middle
+    function: "흰 배경 — 비개발자 고통 포인트 3개 카드"
+    data_source:
+      resource: project_motivation
+
+  - id: before_after
+    type: text_section
+    position: middle
+    function: "연한 파란 배경 — Before/After 비교 표"
+    data_source:
+      resource: project_motivation
+
+  - id: how_to_steps
+    type: text_section
+    position: middle
+    function: "흰 배경 — 3단계 가이드 (번호 + 스크린샷 플레이스홀더)"
+
+  - id: tech_footer
+    type: footer
+    position: bottom
+    function: "어두운 배경 — 기술 스택 배지, 라이선스, GitHub 링크, Made with NerdSpecs"
+    data_source:
+      resource: project_metadata
+
+responsive:
+  desktop: "3-column cards, side-by-side before/after (> 1024px)"
+  tablet: "2-column cards, stacked before/after (768-1024px)"
+  mobile: "Single column, all stacked (< 768px)"
+
+tests:
+  - name: 반응형 그리드 전환
+    when: 뷰포트 768px 미만
+    then:
+      - pain_points 카드 1열 전환
+      - 가로 스크롤바 미발생
+
+  - name: 언어 토글 동작
+    when: 언어 토글 버튼 클릭
+    then:
+      - 모든 텍스트 대상 언어로 즉시 교체
+      - 페이지 새로고침 없이 전환
+      - localStorage에 언어 유지
+
+  - name: CTA 버튼 링크 유효성
+    when: landing_page_url 없음
+    then:
+      - "문서 보기" CTA 숨김 처리
+      - "GitHub 보기" 버튼만 표시
+
+  - name: 기술 스택 배지 빈 배열
+    when: tech_stack 배열 비어있음
+    then:
+      - 배지 행 숨김, 라이선스/GitHub 링크는 정상 노출
+
+  - name: 히어로 이미지 폴백
+    when: 히어로 이미지 파일 미존재
+    then:
+      - 프로젝트 이름 이니셜 SVG 플레이스홀더 대체

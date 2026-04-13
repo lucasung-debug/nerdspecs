@@ -1,0 +1,56 @@
+version: "2.0"
+
+shared_components:
+  - id: nerdspecs_header
+    type: text_block
+    function: "[NerdSpecs] 접두사 + 버전 + 메시지 출력"
+    used_in:
+      - skill-invocation
+      - write-setup-check
+      - write-progress
+      - write-success
+      - write-auto-mode
+      - read-progress
+      - error-generic
+
+  - id: selection_prompt
+    type: selection
+    function: "번호 선택지 표시 (1, 2, 3...) + 사용자 입력 수집"
+    used_in:
+      - skill-invocation
+      - write-memory-confirm
+      - read-explanation
+      - onboarding
+
+  - id: free_text_input
+    type: prompt_input
+    function: "자유 텍스트 입력 프롬프트 (> _ 형태)"
+    validation: "빈 입력 시 재질문"
+    used_in:
+      - write-one-question
+      - think-why-need
+      - think-follow-up
+      - read-url-input
+
+  - id: progress_message
+    type: text_block
+    function: "[NerdSpecs] 단계별 진행 메시지 순차 출력"
+    used_in:
+      - write-progress
+      - read-progress
+
+  - id: bilingual_text_block
+    type: text_section
+    function: "영어 본문 + 구분선 + 한국어 번역 이중 언어 출력"
+    used_in:
+      - read-explanation
+      - generated-readme
+      - generated-landing-page
+
+  - id: status_row
+    type: status_display
+    function: "키: 값 [ON/OFF] 형태의 상태 표시 행"
+    used_in:
+      - status
+      - config
+      - onboarding

@@ -1,0 +1,44 @@
+version: "2.0"
+
+screen:
+  name: 메인 메뉴
+  route: /nerdspecs
+  layout: cli-terminal
+
+data_requirements:
+  - resource: user_preferences
+    needs: [language]
+
+components:
+  - id: header_banner
+    type: text_block
+    position: main
+    function: NerdSpecs 버전 및 태그라인 표시
+
+  - id: main_menu
+    type: menu
+    position: main
+    function: "4개 선택지 — write / read (v0.2) / think (v0.2) / status. v0.2 항목은 잠금 표시"
+
+  - id: first_run_redirect
+    type: status_display
+    position: main
+    function: user_preferences 없으면 온보딩 화면으로 자동 리다이렉트
+
+tests:
+  - name: 첫 실행 감지
+    when: user_preferences 파일이 없을 때
+    then:
+      - 온보딩 화면으로 자동 전환
+
+  - name: 버전 잠금 항목
+    when: 정상 실행 시
+    then:
+      - read와 think에 (v0.2) 레이블 표시
+      - 잠금 항목 선택 시 "Coming in v0.2" 출력
+
+  - name: 메뉴 선택 라우팅
+    when: write 또는 status 선택 시
+    then:
+      - write → /nerdspecs write 화면 이동
+      - status → /nerdspecs status 화면 이동

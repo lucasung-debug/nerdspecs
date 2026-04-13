@@ -1,0 +1,43 @@
+version: "2.0"
+
+screen:
+  name: 오류 표시
+  route: /nerdspecs [any] --error
+  layout: cli-terminal
+
+data_requirements: []
+
+components:
+  - id: error_what
+    type: text_block
+    position: main
+    function: 무슨 일이 발생했는지 평어로 한 줄 설명 (기술 용어 금지)
+
+  - id: error_action
+    type: text_block
+    position: main
+    function: 사용자가 지금 할 수 있는 구체적 조치 1-2개
+
+  - id: error_code
+    type: status_display
+    position: main
+    function: "에러 코드 (ERR_ 접두사) 표시 — 버그 리포트용"
+
+tests:
+  - name: 에러 메시지 평어 출력
+    when: 내부 오류 발생
+    then:
+      - 스택 트레이스 미출력
+      - 사용자 친화적 한 줄 설명
+
+  - name: 조치 안내 표시
+    when: 모든 에러 유형
+    then:
+      - 최소 1개의 실행 가능한 조치 출력
+      - 에러 코드 항상 포함
+
+  - name: 에러 코드 형식
+    when: 에러 코드 렌더링
+    then:
+      - ERR_ 접두사 형식 준수
+      - 복사 가능한 형태로 표시

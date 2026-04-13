@@ -1,0 +1,48 @@
+version: "2.0"
+
+screen:
+  name: 필요 이유 입력
+  route: /nerdspecs think
+  layout: cli-terminal
+
+data_requirements:
+  - resource: explanation_cache
+    needs: [repo]
+
+components:
+  - id: context_reminder
+    type: text_block
+    position: main
+    function: "{repo}" 프로젝트 이름 상단 표시
+
+  - id: why_question
+    type: text_block
+    position: main
+    function: "Why do you think you need {project}?"
+
+  - id: why_input
+    type: prompt_input
+    position: main
+    function: 자유 텍스트로 필요 이유 입력
+
+tests:
+  - name: 구체적 이유 입력
+    when: 충분히 구체적인 이유 입력
+    then:
+      - decision_record에 reasoning 저장
+      - think-decision-saved로 이동
+
+  - name: 모호한 이유 입력
+    when: "유용할 것 같아서" 같은 짧은 답변
+    then:
+      - think-follow-up 화면으로 이동
+
+  - name: 빈 입력
+    when: 엔터만 누름
+    then:
+      - "Please tell me a bit more" 안내 표시
+
+  - name: 프로젝트 이름 표시
+    when: read-explanation에서 Yes 선택 후 진입
+    then:
+      - 상단에 현재 프로젝트 repo 이름 표시

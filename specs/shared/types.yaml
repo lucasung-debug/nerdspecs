@@ -1,0 +1,50 @@
+version: "2.0"
+
+types:
+  - name: Language
+    enum: [en, ko, both]
+    default: both
+
+  - name: Decision
+    enum: [adopt, skip, watch, undecided]
+
+  - name: DecisionStatus
+    enum: [active, superseded, archived]
+
+  - name: ErrorCode
+    pattern: "ERR_{CATEGORY}_{DETAIL}"
+    examples:
+      - ERR_PAGES_PUSH_FAILED
+      - ERR_CONFIG_MISSING
+      - ERR_HOOK_NOT_INSTALLED
+      - ERR_GITHUB_FETCH_FAILED
+      - ERR_MNEMO_UNAVAILABLE
+
+  - name: RepoSlug
+    pattern: "{owner}--{repo}"
+    description: "Git remote URL에서 파생, 소문자, 더블 하이픈 구분"
+
+  - name: MemoryKey
+    pattern: "nerdspecs/{scope}/{slug}/{field}"
+    scopes: [project, evaluated, user]
+
+  - name: ReadmeSections
+    fields:
+      - hero: boolean
+      - plain_explanation: boolean
+      - how_to_use: boolean
+      - tech_stack: boolean
+      - installation: boolean
+
+  - name: TechStack
+    fields:
+      - language: string
+      - frameworks: string[]
+      - apis: string[]
+      - services: string[]
+
+  - name: Breakpoint
+    enum:
+      - desktop: "> 1024px"
+      - tablet: "768-1024px"
+      - mobile: "< 768px"

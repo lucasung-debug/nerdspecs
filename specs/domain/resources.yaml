@@ -1,0 +1,172 @@
+version: "2.0"
+
+resources:
+  - name: project_motivation
+    description: "Why I built this" user answer stored per project
+    storage: mnemo-hook | .nerdspecs/memory.json
+    scope: per-project
+    fields:
+      - id: answer
+        type: string
+        required: true
+      - id: recorded_at
+        type: datetime
+        required: true
+      - id: last_used
+        type: datetime
+        required: true
+      - id: language
+        type: enum [en, ko]
+        required: true
+
+  - name: project_metadata
+    description: Auto-analyzed project snapshot
+    storage: mnemo-hook | .nerdspecs/memory.json
+    scope: per-project
+    fields:
+      - id: repo_url
+        type: string
+      - id: repo_slug
+        type: string
+        required: true
+      - id: display_name
+        type: string
+        required: true
+      - id: detected_language
+        type: string
+      - id: detected_framework
+        type: string
+      - id: entry_file
+        type: string
+      - id: dependency_count
+        type: integer
+      - id: core_files_analyzed
+        type: string[]
+      - id: generated_summary
+        type: string
+        required: true
+      - id: tech_stack
+        type: object
+        children: [language, frameworks, apis, services]
+      - id: last_analyzed
+        type: datetime
+        required: true
+      - id: nerdspecs_version
+        type: string
+
+  - name: project_config
+    description: Per-project NerdSpecs settings
+    storage: mnemo-hook | .nerdspecs/config.json
+    scope: per-project
+    fields:
+      - id: language
+        type: enum [en, ko, both]
+        default: both
+      - id: auto_push
+        type: boolean
+        default: true
+      - id: landing_page_enabled
+        type: boolean
+        default: true
+      - id: landing_page_url
+        type: string
+      - id: readme_sections
+        type: object
+        children: [hero, plain_explanation, how_to_use, tech_stack, installation]
+      - id: hook_installed
+        type: boolean
+        default: false
+      - id: hook_installed_at
+        type: datetime
+      - id: created_at
+        type: datetime
+      - id: updated_at
+        type: datetime
+
+  - name: explanation_cache
+    description: Cached plain-language explanation of external GitHub project
+    storage: mnemo-hook
+    scope: global
+    ttl: 7 days
+    fields:
+      - id: repo_url
+        type: string
+        required: true
+      - id: owner
+        type: string
+        required: true
+      - id: repo
+        type: string
+        required: true
+      - id: fetched_at
+        type: datetime
+        required: true
+      - id: explanation_en
+        type: string
+        required: true
+      - id: explanation_ko
+        type: string
+      - id: use_cases
+        type: string[]
+      - id: target_audience
+        type: string
+      - id: complexity_level
+        type: enum [beginner, intermediate, advanced]
+      - id: nerdspecs_version
+        type: string
+
+  - name: decision_record
+    description: User's reasoning for adopting/skipping a project
+    storage: mnemo-hook
+    scope: global
+    fields:
+      - id: repo_url
+        type: string
+        required: true
+      - id: decision
+        type: enum [adopt, skip, watch, undecided]
+        required: true
+      - id: reasoning
+        type: string
+        required: true
+      - id: reasoning_ko
+        type: string
+      - id: follow_up_answer
+        type: string
+      - id: recorded_at
+        type: datetime
+        required: true
+      - id: reviewed_at
+        type: datetime
+      - id: status
+        type: enum [active, superseded, archived]
+        default: active
+
+  - name: user_preferences
+    description: Global user settings across all projects
+    storage: mnemo-hook | .nerdspecs/memory.json
+    scope: global
+    singleton: true
+    fields:
+      - id: language
+        type: enum [en, ko, both]
+        default: both
+      - id: ask_why_built
+        type: boolean
+        default: true
+      - id: ask_why_need
+        type: boolean
+        default: true
+      - id: auto_deploy_pages
+        type: boolean
+        default: true
+      - id: show_progress
+        type: boolean
+        default: true
+      - id: timezone
+        type: string
+        default: Asia/Seoul
+      - id: created_at
+        type: datetime
+      - id: updated_at
+        type: datetime

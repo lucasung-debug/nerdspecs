@@ -1,0 +1,52 @@
+version: "2.0"
+
+screen:
+  name: 프로젝트 설명
+  route: /nerdspecs read [url] explanation
+  layout: cli-terminal
+
+data_requirements:
+  - resource: explanation_cache
+    needs: [explanation_en, explanation_ko, use_cases, target_audience]
+
+components:
+  - id: explanation_english
+    type: text_block
+    position: main
+    function: 영어 평문 설명 출력
+
+  - id: separator
+    type: text_block
+    position: main
+    function: 구분선으로 영문/한국어 섹션 구분
+
+  - id: explanation_korean
+    type: text_block
+    position: main
+    function: 한국어 번역 출력
+
+  - id: decision_prompt
+    type: selection
+    position: main
+    function: "Do you think you might need this? 1) Yes, record why  2) No  3) Not sure yet"
+
+tests:
+  - name: 이중 언어 표시
+    when: explanation_cache 데이터 준비됨
+    then:
+      - 영어 설명 먼저, 구분선 후 한국어
+
+  - name: Yes 선택
+    when: 사용자가 1 선택
+    then:
+      - think-why-need 화면으로 이동
+
+  - name: No 선택
+    when: 사용자가 2 선택
+    then:
+      - 종료 메시지 출력 후 CLI 복귀
+
+  - name: Not sure yet 선택
+    when: 사용자가 3 선택
+    then:
+      - "You can always come back" 안내 후 종료

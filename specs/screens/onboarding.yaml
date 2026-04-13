@@ -1,0 +1,55 @@
+version: "2.0"
+
+screen:
+  name: 온보딩 (첫 실행)
+  route: /nerdspecs onboarding
+  layout: cli-terminal
+
+data_requirements:
+  - resource: user_preferences
+    needs: [language]
+
+components:
+  - id: step_welcome
+    type: text_block
+    position: main
+    function: "Step 1/4 — NerdSpecs 소개, 이 도구가 무엇인지 2-3줄 평어 설명"
+
+  - id: step_language
+    type: selection
+    position: main
+    function: "Step 2/4 — 언어 선택: both (recommended) / en / ko"
+
+  - id: step_hook_check
+    type: status_display
+    position: main
+    function: "Step 3/4 — mnemo-hook 설치 여부 자동 감지, [connected] 또는 [not found]"
+
+  - id: step_ready
+    type: text_block
+    position: main
+    function: "Step 4/4 — 준비 완료 메시지 및 핵심 명령어 3개 빠른 참조 카드"
+
+tests:
+  - name: 4단계 순차 진행
+    when: /nerdspecs onboarding 첫 실행
+    then:
+      - Step 1→2→3→4 순서로 출력
+      - 각 단계 번호 (Step N/4) 표시
+
+  - name: 언어 선택 저장
+    when: Step 2에서 언어 입력
+    then:
+      - 유효값(both/en/ko)만 허용
+      - user_preferences에 즉시 저장
+
+  - name: mnemo-hook 미설치 처리
+    when: Step 3에서 hook 감지 실패
+    then:
+      - "[not found]" 상태 표시
+      - 설치 없이 계속 진행 가능
+
+  - name: 온보딩 완료 후 상태
+    when: Step 4 완료
+    then:
+      - 다음 실행 시 메인 메뉴 직접 진입

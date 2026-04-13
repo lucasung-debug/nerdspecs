@@ -1,0 +1,47 @@
+version: "2.0"
+
+screen:
+  name: 자동 모드 출력
+  route: /nerdspecs write auto-mode
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_motivation
+    needs: [answer]
+  - resource: project_config
+    needs: [landing_page_url]
+
+components:
+  - id: push_detected_line
+    type: text_block
+    position: main
+    function: "[NerdSpecs] Detected push to main. Updating docs..."
+
+  - id: docs_updated_line
+    type: text_block
+    position: main
+    function: "[NerdSpecs] Docs updated. Landing page: {landing_page_url}"
+    data_source:
+      resource: project_config
+
+tests:
+  - name: 두 줄만 출력
+    when: git push 훅으로 auto-mode 실행
+    then:
+      - 정확히 2줄만 터미널에 출력
+      - 프롬프트나 확인 요청 없음
+
+  - name: project_motivation 없을 때 중단
+    when: project_motivation.answer 미존재
+    then:
+      - "No motivation stored. Run nerdspecs write first." 출력 후 종료
+
+  - name: landing_page_url 없을 때 URL 생략
+    when: project_config.landing_page_url 없음
+    then:
+      - 두 번째 줄에서 URL 부분 생략
+
+  - name: 오류 시 조용한 실패
+    when: 분석 또는 배포 중 예외 발생
+    then:
+      - "[NerdSpecs] Auto-update failed. Run nerdspecs write to retry." 단일 줄 출력

@@ -1,0 +1,66 @@
+version: "2.0"
+
+screen:
+  name: 프로젝트 상태
+  route: /nerdspecs status
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_config
+    needs: [hook_installed, auto_push, landing_page_url, language]
+  - resource: project_metadata
+    needs: [repo_url, display_name]
+  - resource: user_preferences
+    needs: [language]
+  - resource: project_motivation
+    needs: [recorded_at]
+  - resource: decision_record
+    needs: [count]
+
+components:
+  - id: project_header
+    type: text_block
+    position: main
+    function: display_name과 repo_url 출력
+
+  - id: hook_status
+    type: status_display
+    position: main
+    function: mnemo-hook 연결 및 git hook 활성화 여부 [ON]/[OFF]
+
+  - id: memory_stats
+    type: text_block
+    position: main
+    function: why_built 기록 여부, 평가된 프로젝트 수, 마지막 기록일
+
+  - id: landing_info
+    type: text_block
+    position: main
+    function: 랜딩 페이지 URL과 마지막 생성 날짜
+
+  - id: language_setting
+    type: status_display
+    position: main
+    function: 현재 언어 설정 (both/en/ko)
+
+tests:
+  - name: 전체 데이터 정상 출력
+    when: 모든 리소스 존재
+    then:
+      - 프로젝트명, git remote, hook 상태, landing URL, memory 통계 출력
+
+  - name: 미생성 랜딩 페이지
+    when: landing_page_url 없음
+    then:
+      - "[not yet generated]" 표시
+
+  - name: why_built 미기록
+    when: project_motivation.recorded_at 없음
+    then:
+      - "why_built: [not recorded]" 표시
+      - 기록 유도 힌트 출력
+
+  - name: mnemo-hook 미연결
+    when: hook_installed = false
+    then:
+      - "[OFF] mnemo-hook not connected" 경고 출력

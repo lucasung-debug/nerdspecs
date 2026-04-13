@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(xargs wc:*)",
+      "Bash(ls -la /c/Users/propo/Desktop/NerdSpecs/*.json /c/Users/propo/Desktop/NerdSpecs/*.md)"
+    ]
+  }
+}

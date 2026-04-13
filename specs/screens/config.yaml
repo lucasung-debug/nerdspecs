@@ -1,0 +1,46 @@
+version: "2.0"
+
+screen:
+  name: 설정 관리
+  route: /nerdspecs config
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_config
+    needs: [language, auto_push, landing_page_enabled, readme_sections, hook_installed]
+
+components:
+  - id: config_table
+    type: text_block
+    position: main
+    function: 현재 설정값을 키-값 테이블로 출력, 각 항목에 [change]/[remove] 레이블
+    data_source:
+      resource: project_config
+
+  - id: change_instructions
+    type: text_block
+    position: main
+    function: CLI 플래그로 변경하는 방법 안내 (인터랙티브 메뉴 없음)
+
+  - id: sections_list
+    type: text_block
+    position: main
+    function: 랜딩 페이지 포함 섹션 목록 표시
+
+tests:
+  - name: 설정 테이블 전체 출력
+    when: /nerdspecs config 실행
+    then:
+      - 모든 project_config 필드 출력
+      - [change]/[remove] 레이블 각 항목에 표시
+
+  - name: 플래그 기반 변경 안내
+    when: 설정 화면 진입
+    then:
+      - 인터랙티브 프롬프트 미출력
+      - CLI 플래그 예시 최소 2개 출력
+
+  - name: 잘못된 플래그 처리
+    when: 지원하지 않는 플래그 입력
+    then:
+      - 유효한 플래그 목록 인라인 출력

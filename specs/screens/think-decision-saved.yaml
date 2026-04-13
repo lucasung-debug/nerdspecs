@@ -1,0 +1,51 @@
+version: "2.0"
+
+screen:
+  name: 결정 저장 완료
+  route: /nerdspecs think saved
+  layout: cli-terminal
+
+data_requirements:
+  - resource: decision_record
+    needs: [repo_url, decision, reasoning, recorded_at]
+  - resource: explanation_cache
+    needs: [explanation_en]
+
+components:
+  - id: success_header
+    type: text_block
+    position: main
+    function: "Saved." 저장 완료 알림
+
+  - id: decision_summary
+    type: text_block
+    position: main
+    function: "Project / What it does / Why you need it / Decision / Recorded 필드 출력"
+    data_source:
+      resource: decision_record
+
+  - id: next_hint
+    type: text_block
+    position: main
+    function: "You can find all records with /nerdspecs memory show"
+
+tests:
+  - name: 전체 필드 표시
+    when: reasoning 저장 완료
+    then:
+      - project, what it does, why, decision, date 모두 표시
+
+  - name: 날짜 형식
+    when: recorded_at 존재
+    then:
+      - YYYY-MM-DD 형식 표시
+
+  - name: explanation_en 없는 경우
+    when: explanation_cache에 explanation_en 없음
+    then:
+      - "What it does" 줄 생략, 나머지 표시
+
+  - name: 종료 안내
+    when: 화면 렌더링 완료
+    then:
+      - memory show 안내 하단 표시

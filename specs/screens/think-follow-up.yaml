@@ -1,0 +1,49 @@
+version: "2.0"
+
+screen:
+  name: 구체적 사례 요청
+  route: /nerdspecs think follow-up
+  layout: cli-terminal
+
+data_requirements:
+  - resource: decision_record
+    needs: [reasoning]
+
+components:
+  - id: vague_acknowledgment
+    type: text_block
+    position: main
+    function: 첫 답변이 모호했음을 자연스럽게 인정
+
+  - id: followup_question
+    type: text_block
+    position: main
+    function: "Can you give me a specific example of when you'd use this?"
+
+  - id: example_input
+    type: prompt_input
+    position: main
+    function: 구체적 사용 시나리오 자유 텍스트 입력
+
+tests:
+  - name: 모호한 reasoning 감지 후 진입
+    when: reasoning이 10단어 미만이거나 추상적 표현만 포함
+    then:
+      - think-follow-up 화면 표시
+
+  - name: 구체적 사례 입력
+    when: 구체적 사례 입력
+    then:
+      - reasoning + follow_up_answer 합쳐서 decision_record 업데이트
+      - think-decision-saved로 이동
+
+  - name: 두 번째도 모호한 입력
+    when: follow-up 답변도 모호
+    then:
+      - 재질문 없이 있는 그대로 저장
+      - think-decision-saved로 이동
+
+  - name: 건너뛰기
+    when: Enter만 누름
+    then:
+      - 첫 번째 reasoning만 저장 후 think-decision-saved로 이동

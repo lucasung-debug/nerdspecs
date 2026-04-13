@@ -1,0 +1,46 @@
+version: "2.0"
+
+screen:
+  name: URL 입력
+  route: /nerdspecs read
+  layout: cli-terminal
+
+data_requirements: []
+
+components:
+  - id: header_prompt
+    type: text_block
+    position: main
+    function: "Paste a GitHub URL to get a plain explanation."
+
+  - id: url_input_field
+    type: url_input
+    position: main
+    function: GitHub URL 입력 또는 CLI 인자로 받은 URL 처리
+
+  - id: hint_text
+    type: text_block
+    position: main
+    function: "Usage: /nerdspecs read https://github.com/owner/repo"
+
+tests:
+  - name: URL 직접 입력
+    when: 사용자가 GitHub URL 붙여넣고 Enter
+    then:
+      - URL 유효하면 read-progress로 이동
+      - 잘못된 형식이면 오류 메시지 후 재입력
+
+  - name: CLI 인자 URL
+    when: /nerdspecs read https://github.com/owner/repo 형태 실행
+    then:
+      - URL 입력 단계 건너뛰고 read-progress로 직행
+
+  - name: 빈 입력
+    when: 엔터만 누름
+    then:
+      - "Please paste a GitHub URL" 안내 표시
+
+  - name: GitHub 외 URL
+    when: GitHub 도메인이 아닌 URL 입력
+    then:
+      - "Only GitHub URLs are supported" 오류 표시

@@ -1,0 +1,49 @@
+version: "2.0"
+
+screen:
+  name: 생성 진행 상황
+  route: /nerdspecs write progress
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_metadata
+    needs: [core_files_analyzed, display_name]
+  - resource: project_config
+    needs: [landing_page_enabled]
+
+components:
+  - id: step_messages
+    type: text_block
+    position: main
+    function: 각 단계 순차 출력 — 파일 읽기, 분석, README 작성, 랜딩 페이지, 배포
+    data_source:
+      resource: project_metadata
+
+  - id: file_list
+    type: file_list
+    position: main
+    function: 분석 중인 핵심 파일 목록 순차 출력
+    data_source:
+      resource: project_metadata
+
+tests:
+  - name: 단계 메시지 순차 출력
+    when: write-progress 화면 진입
+    then:
+      - Reading → Analyzing → Writing README 순서로 출력
+
+  - name: landing_page_enabled false 시 배포 생략
+    when: project_config.landing_page_enabled = false
+    then:
+      - 랜딩 페이지 및 배포 단계 미출력
+
+  - name: 완료 시 자동 전환
+    when: 모든 단계 완료
+    then:
+      - write-success 화면으로 자동 전환
+
+  - name: 오류 발생 시
+    when: 파일 분석 중 예외 발생
+    then:
+      - 해당 단계에 [ERROR] 접두사 출력
+      - 이후 단계 중단 및 복구 안내

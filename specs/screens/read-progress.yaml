@@ -1,0 +1,37 @@
+version: "2.0"
+
+screen:
+  name: 읽기 진행 중
+  route: /nerdspecs read [url]
+  layout: cli-terminal
+
+data_requirements: []
+
+components:
+  - id: fetch_line
+    type: text_block
+    position: main
+    function: "Fetching {repo} from GitHub..."
+
+  - id: reading_line
+    type: text_block
+    position: main
+    function: "Reading this project for you..."
+
+tests:
+  - name: 순차 메시지 표시
+    when: URL 유효하고 fetch 시작
+    then:
+      - 첫 줄 "Fetching {repo}..." 표시
+      - fetch 완료 후 "Reading this project..." 표시
+
+  - name: 완료 후 전환
+    when: 두 줄 모두 표시 후
+    then:
+      - read-explanation 화면으로 자동 이동
+
+  - name: 네트워크 오류
+    when: GitHub에서 데이터 가져오기 실패
+    then:
+      - "Could not fetch repository" 오류 표시
+      - read-url-input으로 복귀

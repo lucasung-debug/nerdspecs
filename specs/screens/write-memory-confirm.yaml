@@ -1,0 +1,51 @@
+version: "2.0"
+
+screen:
+  name: 기존 답변 확인
+  route: /nerdspecs write memory-confirm
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_motivation
+    needs: [answer, recorded_at, language]
+
+components:
+  - id: stored_answer_block
+    type: text_block
+    position: main
+    function: 저장된 동기 답변과 상대 시간 표시 (예: "7 days ago")
+    data_source:
+      resource: project_motivation
+
+  - id: accuracy_selection
+    type: selection
+    position: main
+    function: "1) Yes, use this answer  2) No, let me update it"
+
+  - id: timestamp_note
+    type: text_block
+    position: main
+    function: recorded_at 절대 날짜 및 상대 시간 병기
+
+tests:
+  - name: 저장된 답변 표시
+    when: project_motivation 존재 상태에서 write 실행
+    then:
+      - answer 전문 출력
+      - recorded_at 상대 시간 표시
+
+  - name: 1 선택 시 기존 답변 재사용
+    when: 사용자가 1 입력
+    then:
+      - project_motivation.last_used 갱신
+      - write-progress 화면으로 전환
+
+  - name: 2 선택 시 재입력
+    when: 사용자가 2 입력
+    then:
+      - write-one-question 화면으로 전환
+
+  - name: project_motivation 없으면 건너뜀
+    when: project_motivation 레코드 없음
+    then:
+      - write-one-question으로 직접 전환

@@ -1,0 +1,53 @@
+version: "2.0"
+
+screen:
+  name: 완료 결과 출력
+  route: /nerdspecs write success
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_config
+    needs: [landing_page_url, language]
+  - resource: project_metadata
+    needs: [display_name]
+
+components:
+  - id: success_header
+    type: text_block
+    position: main
+    function: 완료 메시지 — 프로젝트명과 체크 기호
+    data_source:
+      resource: project_metadata
+
+  - id: readme_result
+    type: text_block
+    position: main
+    function: README.md 업데이트 결과 — 라인 수 및 이중 언어 여부
+
+  - id: landing_page_link
+    type: text_block
+    position: main
+    function: 랜딩 페이지 URL 및 GitHub Pages 반영 지연 안내
+    data_source:
+      resource: project_config
+
+tests:
+  - name: README 라인 수 출력
+    when: write-success 화면 진입
+    then:
+      - README.md 라인 수 숫자로 표시
+
+  - name: 이중 언어 설정 시 bilingual 표시
+    when: project_config.language = both
+    then:
+      - "(bilingual)" 레이블 출력
+
+  - name: 랜딩 페이지 비활성화 시 URL 미표시
+    when: project_config.landing_page_url 없음
+    then:
+      - 랜딩 페이지 섹션 미출력
+
+  - name: GitHub Pages 지연 안내
+    when: landing_page_url 존재
+    then:
+      - "GitHub Pages may take up to 2 minutes" 안내 출력

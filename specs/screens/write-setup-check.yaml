@@ -1,0 +1,52 @@
+version: "2.0"
+
+screen:
+  name: 프로젝트 설정 확인
+  route: /nerdspecs write setup-check
+  layout: cli-terminal
+
+data_requirements:
+  - resource: project_metadata
+    needs: [display_name, detected_language, detected_framework, entry_file]
+  - resource: project_config
+    needs: [language, landing_page_enabled, created_at]
+
+components:
+  - id: header_banner
+    type: text_block
+    position: main
+    function: NerdSpecs 로고와 버전 출력
+
+  - id: detected_info_block
+    type: text_block
+    position: main
+    function: 감지된 프로젝트 이름, 언어, 프레임워크, 진입 파일 표시
+    data_source:
+      resource: project_metadata
+
+  - id: continue_prompt
+    type: prompt_input
+    position: main
+    function: "계속 진행할지 확인 — Continue? [Y/n]"
+
+tests:
+  - name: 정상 감지 시 정보 출력
+    when: .nerdspecs/config.json 없이 nerdspecs write 실행
+    then:
+      - display_name, detected_language, detected_framework 표시
+      - Continue? [Y/n] 프롬프트 노출
+
+  - name: n 입력 시 종료
+    when: 사용자가 n 또는 N 입력
+    then:
+      - Aborted 메시지 출력 후 CLI 종료
+
+  - name: 엔터(기본값 Y) 시 다음 화면
+    when: 사용자가 엔터만 누름
+    then:
+      - write-one-question 화면으로 전환
+
+  - name: 기존 config 존재 시 건너뜀
+    when: .nerdspecs/config.json 이미 존재
+    then:
+      - write-memory-confirm 또는 write-one-question으로 직접 진입

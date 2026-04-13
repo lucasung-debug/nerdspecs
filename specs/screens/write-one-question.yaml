@@ -1,0 +1,46 @@
+version: "2.0"
+
+screen:
+  name: 동기 질문 입력
+  route: /nerdspecs write one-question
+  layout: cli-terminal
+
+data_requirements: []
+
+components:
+  - id: question_header
+    type: text_block
+    position: main
+    function: "핵심 질문 — Why did you build this project?"
+
+  - id: motivation_input
+    type: prompt_input
+    position: main
+    function: 사용자 자유 텍스트 입력 수집
+
+  - id: hint_text
+    type: text_block
+    position: main
+    function: "(Write in your own words — no technical language needed.)"
+
+tests:
+  - name: 빈 입력 시 재질문
+    when: 사용자가 엔터만 누름
+    then:
+      - 오류 메시지 후 동일 프롬프트 재노출
+
+  - name: 정상 입력 시 저장 후 진행
+    when: 사용자가 텍스트 입력
+    then:
+      - project_motivation [answer, language, recorded_at] 저장
+      - write-progress 화면으로 전환
+
+  - name: 한국어 입력 감지
+    when: 사용자 입력에 한글 포함
+    then:
+      - project_motivation.language = ko
+
+  - name: 영어 입력 감지
+    when: 사용자 입력이 ASCII 문자만
+    then:
+      - project_motivation.language = en
