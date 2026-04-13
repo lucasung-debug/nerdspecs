@@ -20,12 +20,14 @@ const LABELS = {
   en: {
     whatIsThis: 'What is this?',
     whoIsItFor: 'Who is this for?',
+    installation: 'Installation',
     howToUse: 'How to use',
     techStack: 'Tech Stack',
   },
   ko: {
     whatIsThis: '이게 뭐예요?',
     whoIsItFor: '누구를 위한 건가요?',
+    installation: '설치',
     howToUse: '사용 방법',
     techStack: '기술 스택',
   },
@@ -71,9 +73,26 @@ function installCommand(lang: string): string {
   return 'npm install';
 }
 
+function usageCommand(lang: string): string {
+  const lower = lang.toLowerCase();
+  if (lower === 'python') return 'python main.py';
+  if (lower === 'go') return 'go run .';
+  return 'npm run dev';
+}
+
+function installationSection(data: ReadmeData): string {
+  if (!data.sections.installation) return '';
+  const cmd = installCommand(data.tech_stack.language);
+  const en = `## ${LABELS.en.installation}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
+  const ko = `## ${LABELS.ko.installation}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
+  if (data.language_mode === 'en') return en + '\n';
+  if (data.language_mode === 'ko') return ko + '\n';
+  return `${en}\n\n---\n\n${ko}\n`;
+}
+
 function howToUseSection(data: ReadmeData): string {
   if (!data.sections.how_to_use) return '';
-  const cmd = installCommand(data.tech_stack.language);
+  const cmd = usageCommand(data.tech_stack.language);
   const en = `## ${LABELS.en.howToUse}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
   const ko = `## ${LABELS.ko.howToUse}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
   if (data.language_mode === 'en') return en + '\n';
@@ -103,6 +122,7 @@ export function generateReadme(data: ReadmeData): string {
     heroSection(data),
     plainExplanationSection(data),
     whoIsItForSection(data),
+    installationSection(data),
     howToUseSection(data),
     techStackSection(data),
     FOOTER,

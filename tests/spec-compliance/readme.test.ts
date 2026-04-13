@@ -145,6 +145,26 @@ describe('spec: nerdspecs_footer HTML comment', () => {
   });
 });
 
+describe('spec: installation section', () => {
+  it('installation enabled renders an installation heading', () => {
+    const out = generateReadme(sampleData());
+    expect(out).toContain('Installation');
+  });
+
+  it('installation disabled removes the installation heading', () => {
+    const out = generateReadme(sampleData({
+      sections: {
+        hero: true,
+        plain_explanation: true,
+        how_to_use: true,
+        tech_stack: true,
+        installation: false,
+      },
+    }));
+    expect(out).not.toContain('Installation');
+  });
+});
+
 // ─── spec: bilingual structure (language=both) ───────────────────────────────
 describe('spec: bilingual structure (language_mode=both)', () => {
   it('both mode — EN and KO sections separated by ---', () => {

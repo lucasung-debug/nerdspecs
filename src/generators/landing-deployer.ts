@@ -9,8 +9,13 @@ import { validatePath } from '../utils.js';
 
 function parseOwnerRepo(repoSlug: string): { owner: string; repo: string } {
   const sep = repoSlug.indexOf('--');
-  if (sep === -1) throw new Error(`Invalid repoSlug format: ${repoSlug}`);
-  return { owner: repoSlug.slice(0, sep), repo: repoSlug.slice(sep + 2) };
+  if (sep === -1) return { owner: repoSlug, repo: repoSlug };
+
+  const owner = repoSlug.slice(0, sep);
+  const repo = repoSlug.slice(sep + 2);
+  if (!owner || !repo) return { owner: repoSlug, repo: repoSlug };
+
+  return { owner, repo };
 }
 
 function deriveUrl(repoSlug: string): string {

@@ -78,6 +78,16 @@ describe('deployLandingPage', () => {
     expect(url).toBe('https://johndoe.github.io/my-project/');
   });
 
+  it('uses the first separator when repo names contain --', async () => {
+    const { url } = await deployLandingPage(tmpDir, '', 'johndoe--my--project');
+    expect(url).toBe('https://johndoe.github.io/my--project/');
+  });
+
+  it('falls back to the slug when no git-style owner--repo format is available', async () => {
+    const { url } = await deployLandingPage(tmpDir, '', 'NerdSpecs');
+    expect(url).toBe('https://NerdSpecs.github.io/NerdSpecs/');
+  });
+
   it('normalizes docs path inside the project root', async () => {
     const result = await deployLandingPage(join(tmpDir, '.', 'site', '..'), '<html></html>', 'owner--repo');
     expect(result.path).toBe(join(tmpDir, 'docs', 'index.html'));

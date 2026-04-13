@@ -84,6 +84,20 @@ describe('runProgress', () => {
     expect(result.landing_page_url).toBeUndefined();
     await expect(readFile(join(tmpDir, 'README.md'), 'utf8')).resolves.toContain('A mock summary.');
   });
+
+  it('propagates README generation failures', async () => {
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false });
+    const generators = await import('../src/generators/index.js');
+    const generateReadmeSpy = vi.spyOn(generators, 'generateReadme').mockImplementationOnce(() => {
+      throw new Error('README generation failed');
+    });
+
+    try {
+      await expect(runProgress(adapter, REPO_SLUG, tmpDir)).rejects.toThrow('README generation failed');
+    } finally {
+      generateReadmeSpy.mockRestore();
+    }
+  });
 });
 
 describe('runSuccess', () => {

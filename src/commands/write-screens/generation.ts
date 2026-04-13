@@ -4,12 +4,18 @@ import type { AnalysisResult } from '../../resources/code-analyzer.js';
 import { DEFAULT_README_SECTIONS, type ProjectConfig } from '../../resources/project-config.js';
 import type { ProjectMotivation } from '../../resources/project-motivation.js';
 
+function splitRepoSlug(repoSlug: string): { owner?: string; repo: string } {
+  const sep = repoSlug.indexOf('--');
+  if (sep === -1) return { repo: repoSlug };
+  return { owner: repoSlug.slice(0, sep), repo: repoSlug.slice(sep + 2) };
+}
+
 function repoPart(repoSlug: string): string {
-  return repoSlug.split('--')[1] ?? repoSlug;
+  return splitRepoSlug(repoSlug).repo;
 }
 
 export function buildRepoUrl(repoSlug: string): string | undefined {
-  const [owner, repo] = repoSlug.split('--');
+  const { owner, repo } = splitRepoSlug(repoSlug);
   if (!owner || !repo) return undefined;
   return `https://github.com/${owner}/${repo}`;
 }
