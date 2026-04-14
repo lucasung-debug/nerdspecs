@@ -16,7 +16,7 @@ export async function generateProjectSummary(
   context: SummaryContext
 ): Promise<{ summary: string; tech_stack_description: string }> {
   const [summary, tech_stack_description] = await Promise.all([
-    provider.generateSummary(context),
+    provider.generateSummary(context, context.language),
     Promise.resolve(buildTechStackDescription(context)),
   ]);
   return { summary, tech_stack_description };

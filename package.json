@@ -1,6 +1,6 @@
 {
   "name": "nerdspecs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Put on nerd glasses and the project becomes visible. Translate AI-built projects into human-readable explanations.",
   "type": "module",
   "bin": {

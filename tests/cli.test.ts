@@ -16,17 +16,18 @@ function runCLI(args: string[]): string {
 }
 
 describe('CLI binary', () => {
-  it('--version returns 0.1.0', () => {
+  it('--version returns 0.2.0', () => {
     const output = runCLI(['--version']);
-    expect(output.trim()).toBe('0.1.0');
+    expect(output.trim()).toBe('0.2.0');
   });
 
-  it('--help lists all five commands', () => {
+  it('--help lists all six commands', () => {
     const output = runCLI(['--help']);
     expect(output).toContain('write');
     expect(output).toContain('read');
     expect(output).toContain('think');
     expect(output).toContain('status');
     expect(output).toContain('config');
+    expect(output).toContain('memory');
   });
 });

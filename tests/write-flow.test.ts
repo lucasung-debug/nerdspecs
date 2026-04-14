@@ -113,10 +113,26 @@ describe('write flow: auto mode', () => {
   it('calls runAutoMode directly, skips interactive screens', async () => {
     await runWrite(['--auto']);
 
-    expect(runAutoMode).toHaveBeenCalledWith(expect.anything(), 'owner--repo', process.cwd());
+    expect(runAutoMode).toHaveBeenCalledWith(
+      expect.anything(),
+      'owner--repo',
+      process.cwd(),
+      { language: undefined, dryRun: false, noPages: false },
+    );
     expect(runOneQuestion).not.toHaveBeenCalled();
     expect(runMemoryConfirm).not.toHaveBeenCalled();
     expect(runSuccess).not.toHaveBeenCalled();
+  });
+
+  it('passes write flags through to auto mode', async () => {
+    await runWrite(['--auto', '--lang=ko', '--dry-run', '--no-pages']);
+
+    expect(runAutoMode).toHaveBeenCalledWith(
+      expect.anything(),
+      'owner--repo',
+      process.cwd(),
+      { language: 'ko', dryRun: true, noPages: true },
+    );
   });
 });
 
@@ -144,5 +160,21 @@ describe('write flow: onboarding needed', () => {
     expect(calls[0]).toBe('onboarding');
     expect(calls[1]).toBe('setup');
     expect(runOnboarding).toHaveBeenCalledWith(expect.anything());
+  });
+});
+
+describe('write flow: flag forwarding', () => {
+  it('passes language, dry-run, and no-pages to the interactive flow', async () => {
+    vi.mocked(runMemoryConfirm).mockResolvedValue(true);
+
+    await runWrite(['--lang=ko', '--dry-run', '--no-pages']);
+
+    expect(runProgress).toHaveBeenCalledWith(
+      expect.anything(),
+      'owner--repo',
+      process.cwd(),
+      { language: 'ko', dryRun: true, noPages: true },
+    );
+    expect(runSuccess).toHaveBeenCalled();
   });
 });

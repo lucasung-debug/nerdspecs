@@ -6,6 +6,7 @@ import { buildSummaryContext, buildReadmeData, buildLandingData, buildRepoUrl } 
 import { generateProjectSummary } from '../src/generators/summary.js';
 import { generateReadme } from '../src/generators/readme-template.js';
 import { generateLandingPage } from '../src/generators/landing-template.js';
+import { MockProvider } from '../src/llm/mock-provider.js';
 
 const analysis: AnalysisResult = {
   primary_language: 'TypeScript',
@@ -50,7 +51,7 @@ describe('write-screens generation builders', () => {
     const repoSlug = 'acme--docs--site';
     const provider = { generateSummary: vi.fn().mockResolvedValue('A generated summary.') };
 
-    const summaryContext = buildSummaryContext(repoSlug, analysis, motivation);
+    const summaryContext = buildSummaryContext(repoSlug, analysis, motivation, config.language);
     expect(summaryContext).toEqual({
       project_name: 'docs--site',
       primary_language: 'TypeScript',
@@ -58,10 +59,11 @@ describe('write-screens generation builders', () => {
       dependencies: ['next', 'react', 'zod', 'vitest'],
       entry_file: 'src/index.ts',
       motivation: 'Product managers need a quick explanation.',
+      language: 'en',
     });
 
     const { summary } = await generateProjectSummary(provider as any, summaryContext);
-    expect(provider.generateSummary).toHaveBeenCalledWith(summaryContext);
+    expect(provider.generateSummary).toHaveBeenCalledWith(summaryContext, 'en');
     expect(buildRepoUrl(repoSlug)).toBe('https://github.com/acme/docs--site');
 
     const readme = generateReadme(buildReadmeData(repoSlug, config, analysis, summary));
@@ -69,7 +71,7 @@ describe('write-screens generation builders', () => {
     expect(readme).toContain('## Installation');
     expect(readme).toContain('npm install');
 
-    const landing = generateLandingPage(buildLandingData(repoSlug, config, analysis, summary, motivation));
+    const landing = generateLandingPage(await buildLandingData(repoSlug, config, analysis, summary, motivation));
     expect(landing).toContain('docs--site');
     expect(landing).toContain('https://github.com/acme/docs--site');
   });
@@ -95,9 +97,35 @@ describe('write-screens generation builders', () => {
       installation: true,
     });
 
-    const landingData = buildLandingData(repoSlug, config, analysis, undefined, motivation);
-    expect(landingData.project_name).toBe('NerdSpecs');
-    expect(landingData.repo_url).toBeUndefined();
-    expect(landingData.pain_points[0]).toContain('NerdSpecs');
+    return buildLandingData(repoSlug, config, analysis, undefined, motivation, new MockProvider())
+      .then((landingData) => {
+        expect(landingData.project_name).toBe('NerdSpecs');
+        expect(landingData.repo_url).toBeUndefined();
+        expect(landingData.pain_points[0]).toContain('NerdSpecs');
+      });
+  });
+
+  it('uses LLM-generated pain points when motivation is available', async () => {
+    const provider = {
+      generatePainPoints: vi.fn().mockResolvedValue(
+        '1. Explaining the product still takes a live walkthrough.\n2. README updates keep falling behind the code.\n3. Stakeholders struggle to see the value quickly.',
+      ),
+    };
+
+    const landingData = await buildLandingData(
+      'owner--repo',
+      config,
+      analysis,
+      'A generated summary.',
+      motivation,
+      provider as any,
+    );
+
+    expect(provider.generatePainPoints).toHaveBeenCalledWith(motivation.answer);
+    expect(landingData.pain_points).toEqual([
+      'Explaining the product still takes a live walkthrough.',
+      'README updates keep falling behind the code.',
+      'Stakeholders struggle to see the value quickly.',
+    ]);
   });
 });

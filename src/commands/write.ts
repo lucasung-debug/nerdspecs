@@ -8,10 +8,17 @@ import { isOnboardingNeeded, runOnboarding } from './onboarding.js';
 import { runSetupCheck } from './write-screens/setup-check.js';
 import { runOneQuestion } from './write-screens/one-question.js';
 import { runMemoryConfirm } from './write-screens/memory-confirm.js';
-import { runProgress } from './write-screens/progress.js';
+import { runProgress, type WriteFlowOptions } from './write-screens/progress.js';
 import { runSuccess } from './write-screens/success.js';
 import { runAutoMode } from './write-screens/auto-mode.js';
 import type { StorageAdapter } from '../storage/adapter.js';
+import type { ProjectConfig } from '../resources/project-config.js';
+
+function parseLanguageOverride(value?: string): ProjectConfig['language'] | undefined {
+  if (!value) return undefined;
+  if (value === 'en' || value === 'ko' || value === 'both') return value;
+  throw new Error(`Invalid --lang value "${value}". Valid values: en, ko, both.`);
+}
 
 async function maybeOnboard(storage: StorageAdapter): Promise<void> {
   if (await isOnboardingNeeded(storage)) {
@@ -19,7 +26,7 @@ async function maybeOnboard(storage: StorageAdapter): Promise<void> {
   }
 }
 
-async function runInteractiveFlow(storage: StorageAdapter): Promise<void> {
+async function runInteractiveFlow(storage: StorageAdapter, options: WriteFlowOptions): Promise<void> {
   const { repo_slug, skip } = await runSetupCheck(storage);
   if (skip) return;
 
@@ -28,25 +35,31 @@ async function runInteractiveFlow(storage: StorageAdapter): Promise<void> {
     await runOneQuestion(storage, repo_slug);
   }
 
-  const result = await runProgress(storage, repo_slug, process.cwd());
+  const result = await runProgress(storage, repo_slug, process.cwd(), options);
   await runSuccess(result, repo_slug);
 }
 
-async function runAutoFlow(storage: StorageAdapter): Promise<void> {
+async function runAutoFlow(storage: StorageAdapter, options: WriteFlowOptions): Promise<void> {
   const { repo_slug, skip } = await runSetupCheck(storage);
   if (skip) return;
-  await runAutoMode(storage, repo_slug, process.cwd());
+  await runAutoMode(storage, repo_slug, process.cwd(), options);
 }
 
-async function runSelectedFlow(storage: StorageAdapter, auto: boolean): Promise<void> {
-  if (auto) return runAutoFlow(storage);
-  await runInteractiveFlow(storage);
+async function runSelectedFlow(storage: StorageAdapter, auto: boolean, options: WriteFlowOptions): Promise<void> {
+  if (auto) return runAutoFlow(storage, options);
+  await runInteractiveFlow(storage, options);
 }
 
-export async function runWriteCommand(options: { auto?: boolean } = {}): Promise<void> {
+export async function runWriteCommand(
+  options: { auto?: boolean; lang?: string; dryRun?: boolean; noPages?: boolean } = {},
+): Promise<void> {
   const storage = await createStorageAdapter();
   await maybeOnboard(storage);
-  await runSelectedFlow(storage, Boolean(options.auto));
+  await runSelectedFlow(storage, Boolean(options.auto), {
+    language: parseLanguageOverride(options.lang),
+    dryRun: Boolean(options.dryRun),
+    noPages: Boolean(options.noPages),
+  });
 }
 
 export function registerWriteCommand(program: Command): void {
@@ -54,7 +67,15 @@ export function registerWriteCommand(program: Command): void {
     .command('write')
     .description('Create docs for THIS project')
     .option('--auto', 'Auto mode (git hook trigger)')
+    .option('--lang <value>', 'en | ko | both')
+    .option('--dry-run', 'Generate without writing files')
+    .option('--no-pages', 'Skip landing page generation')
     .action(wrapCommand(async (options) => {
-      await runWriteCommand({ auto: Boolean(options.auto) });
+      await runWriteCommand({
+        auto: Boolean(options.auto),
+        lang: options.lang as string | undefined,
+        dryRun: Boolean(options.dryRun),
+        noPages: options.pages === false || Boolean(options.noPages),
+      });
     }));
 }

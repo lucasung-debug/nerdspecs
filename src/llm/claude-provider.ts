@@ -2,8 +2,9 @@
 // @SPEC docs/planning/06-tasks.md
 
 import { NerdSpecsError } from '../errors.js';
-import type { LLMProvider, SummaryContext } from './provider.js';
-import { buildPrompt } from './prompts.js';
+import type { LLMProvider, OutputLanguage, SummaryContext } from './provider.js';
+import { buildPainPointsPrompt, buildPrompt } from './prompts.js';
+import { withRetry } from './retry.js';
 
 const CLAUDE_API_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-sonnet-4-20250514';
@@ -18,28 +19,30 @@ function getApiKey(): string {
   return key;
 }
 
-async function callClaude(prompt: string): Promise<string> {
-  const res = await fetch(CLAUDE_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': getApiKey(),
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 256,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
-
-  if (!res.ok) {
-    throw new NerdSpecsError('ERR_LLM_UNAVAILABLE', {
-      message: `Claude API error: ${res.status} ${res.statusText}`,
+async function callClaude(prompt: string, maxTokens = 256): Promise<string> {
+  return withRetry(async () => {
+    const res = await fetch(CLAUDE_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
-  }
 
-  return parseClaudeResponse((await res.json()) as ClaudeResponse);
+    if (!res.ok) {
+      throw new NerdSpecsError('ERR_LLM_UNAVAILABLE', {
+        message: `Claude API error: ${res.status} ${res.statusText}`,
+      });
+    }
+
+    return parseClaudeResponse((await res.json()) as ClaudeResponse);
+  });
 }
 
 function parseClaudeResponse(data: ClaudeResponse): string {
@@ -47,7 +50,14 @@ function parseClaudeResponse(data: ClaudeResponse): string {
 }
 
 export class ClaudeProvider implements LLMProvider {
-  async generateSummary(context: SummaryContext): Promise<string> {
-    return callClaude(buildPrompt(context));
+  async generateSummary(
+    context: SummaryContext,
+    language: OutputLanguage = context.language ?? 'en',
+  ): Promise<string> {
+    return callClaude(buildPrompt(context, language));
+  }
+
+  async generatePainPoints(motivation: string): Promise<string> {
+    return callClaude(buildPainPointsPrompt(motivation), 128);
   }
 }

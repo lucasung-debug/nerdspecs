@@ -26,10 +26,13 @@ describe('config --install-hook', () => {
   it('creates a post-push hook and updates config metadata', async () => {
     const config = await runConfigCommand(adapter, { installHook: true }, 'owner--repo', projectDir);
     const hookPath = join(projectDir, '.git', 'hooks', 'post-push');
+    const gitignorePath = join(projectDir, '.gitignore');
     const content = await readFile(hookPath, 'utf-8');
+    const gitignore = await readFile(gitignorePath, 'utf-8');
 
     expect(content).toContain('#!/bin/sh');
     expect(content).toContain('npx nerdspecs write --auto');
+    expect(gitignore).toContain('.nerdspecs/');
     expect(config.hook_installed).toBe(true);
     expect(config.hook_installed_at).toBeTruthy();
 
@@ -47,5 +50,18 @@ describe('config --install-hook', () => {
     const content = await readFile(hookPath, 'utf-8');
     expect(content).toContain('echo existing-hook');
     expect(content).toMatch(/echo existing-hook[\s\S]*npx nerdspecs write --auto/);
+  });
+
+  it('appends .nerdspecs/ to an existing .gitignore once', async () => {
+    const gitignorePath = join(projectDir, '.gitignore');
+    await writeFile(gitignorePath, 'node_modules/\ndist/\n', 'utf-8');
+
+    await runConfigCommand(adapter, { installHook: true }, 'owner--repo', projectDir);
+    await runConfigCommand(adapter, { installHook: true }, 'owner--repo', projectDir);
+
+    const content = await readFile(gitignorePath, 'utf-8');
+    expect(content).toContain('node_modules/');
+    expect(content).toContain('dist/');
+    expect(content.match(/\.nerdspecs\//g)).toHaveLength(1);
   });
 });

@@ -1,7 +1,7 @@
 // @TASK P2-R5-T2 - Mock Provider for Testing/Offline
 // @SPEC docs/planning/06-tasks.md
 
-import type { LLMProvider, SummaryContext } from './provider.js';
+import type { LLMProvider, OutputLanguage, SummaryContext } from './provider.js';
 
 const FRAMEWORK_PURPOSE: Record<string, string> = {
   express: 'serves a web application',
@@ -26,7 +26,10 @@ function getPurposeGuess(framework?: string): string {
 }
 
 export class MockProvider implements LLMProvider {
-  async generateSummary(context: SummaryContext): Promise<string> {
+  async generateSummary(
+    context: SummaryContext,
+    _language: OutputLanguage = context.language ?? 'en',
+  ): Promise<string> {
     const frameworkClause = context.framework ? ` built with ${context.framework}` : '';
     const purpose = getPurposeGuess(context.framework);
     return `**${context.project_name}** is a ${context.primary_language} project${frameworkClause} that ${purpose}.`;

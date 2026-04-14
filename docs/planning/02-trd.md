@@ -395,3 +395,11 @@ cd ~/.claude/skills/nerdspecs && npm install
 ### Peer Dependencies (must be installed separately)
 - `astro` (optional, for landing page generation)
 - `mnemo-hook` CLI (optional, for memory features)
+
+## Implementation Notes (v0.1)
+
+- Astro → plain HTML with inline CSS/JS (simpler, zero dependencies)
+- @octokit/rest → native `fetch()` (lighter, no extra dependency)
+- handlebars → template literals (TypeScript native)
+- jest → vitest (faster, ESM-native)
+- mnemo-hook → `LocalFileAdapter` (mnemo-hook not yet published)

@@ -6,6 +6,9 @@ import { MockProvider } from '../src/llm/mock-provider.js';
 import { createLLMProvider } from '../src/llm/index.js';
 import { generateProjectSummary } from '../src/generators/summary.js';
 import type { SummaryContext } from '../src/llm/provider.js';
+import { ClaudeProvider } from '../src/llm/claude-provider.js';
+import { OpenAIProvider } from '../src/llm/openai-provider.js';
+import { buildPainPointsPrompt, buildPrompt } from '../src/llm/prompts.js';
 
 const BLOCKLIST = ['algorithm', 'API endpoint', 'middleware', 'singleton', 'instantiate', 'refactor', 'transpile'];
 
@@ -55,6 +58,24 @@ describe('MockProvider', () => {
   });
 });
 
+describe('prompt builders', () => {
+  it('adds Korean instruction when ko output is requested', () => {
+    const prompt = buildPrompt(sampleContext, 'ko');
+    expect(prompt).toContain('Respond entirely in Korean (한국어로 답변해주세요).');
+  });
+
+  it('adds bilingual instruction when both output is requested', () => {
+    const prompt = buildPrompt(sampleContext, 'both');
+    expect(prompt).toContain('Provide the response first in English, then in Korean separated by ---');
+  });
+
+  it('buildPainPointsPrompt asks for exactly three pain points', () => {
+    const prompt = buildPainPointsPrompt('Help teammates explain the product faster.');
+    expect(prompt).toContain('exactly 3 short pain points');
+    expect(prompt).toContain('JSON array');
+  });
+});
+
 describe('createLLMProvider', () => {
   let savedAnthropicKey: string | undefined;
   let savedOpenAIKey: string | undefined;
@@ -65,11 +86,14 @@ describe('createLLMProvider', () => {
     delete process.env['ANTHROPIC_API_KEY'];
     delete process.env['CLAUDE_API_KEY'];
     delete process.env['OPENAI_API_KEY'];
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     if (savedAnthropicKey !== undefined) process.env['ANTHROPIC_API_KEY'] = savedAnthropicKey;
     if (savedOpenAIKey !== undefined) process.env['OPENAI_API_KEY'] = savedOpenAIKey;
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it('returns MockProvider when no API keys are set', async () => {
@@ -79,6 +103,68 @@ describe('createLLMProvider', () => {
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(0);
     expect(warn).toHaveBeenCalledWith('⚠ No API key found. Using offline mode — summaries will be template-based.');
+  });
+});
+
+describe('provider retry behavior', () => {
+  const originalAnthropicKey = process.env['ANTHROPIC_API_KEY'];
+  const originalOpenAIKey = process.env['OPENAI_API_KEY'];
+
+  beforeEach(() => {
+    process.env['ANTHROPIC_API_KEY'] = 'test-claude-key';
+    process.env['OPENAI_API_KEY'] = 'test-openai-key';
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    if (originalAnthropicKey === undefined) {
+      delete process.env['ANTHROPIC_API_KEY'];
+    } else {
+      process.env['ANTHROPIC_API_KEY'] = originalAnthropicKey;
+    }
+
+    if (originalOpenAIKey === undefined) {
+      delete process.env['OPENAI_API_KEY'];
+    } else {
+      process.env['OPENAI_API_KEY'] = originalOpenAIKey;
+    }
+
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('retries Claude requests once after a transient failure', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('timeout'))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'Claude summary' }] }),
+      } satisfies Partial<Response>);
+    vi.stubGlobal('fetch', fetchMock);
+
+    const resultPromise = new ClaudeProvider().generateSummary(sampleContext);
+    await vi.runAllTimersAsync();
+
+    await expect(resultPromise).resolves.toBe('Claude summary');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries OpenAI requests once after a transient failure', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('timeout'))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ choices: [{ message: { content: 'OpenAI summary' } }] }),
+      } satisfies Partial<Response>);
+    vi.stubGlobal('fetch', fetchMock);
+
+    const resultPromise = new OpenAIProvider().generateSummary(sampleContext);
+    await vi.runAllTimersAsync();
+
+    await expect(resultPromise).resolves.toBe('OpenAI summary');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -108,5 +194,14 @@ describe('generateProjectSummary', () => {
     for (const word of BLOCKLIST) {
       expect(result.summary.toLowerCase()).not.toContain(word.toLowerCase());
     }
+  });
+
+  it('passes requested output language through to the provider', async () => {
+    const provider = { generateSummary: vi.fn().mockResolvedValue('Korean summary') };
+    const context: SummaryContext = { ...sampleContext, language: 'ko' };
+
+    await generateProjectSummary(provider as any, context);
+
+    expect(provider.generateSummary).toHaveBeenCalledWith(context, 'ko');
   });
 });

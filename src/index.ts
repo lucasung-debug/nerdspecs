@@ -6,6 +6,7 @@ import {
   registerThinkCommand,
   registerStatusCommand,
   registerConfigCommand,
+  registerMemoryCommand,
   runWriteCommand,
   runReadCommand,
   runThinkCommand,
@@ -16,7 +17,7 @@ import { wrapCommand } from './errors.js';
 import { createStorageAdapter } from './storage/auto-detect.js';
 
 function printHeader(): void {
-  console.log(chalk.yellow('  🤓 NerdSpecs v0.1.0'));
+  console.log(chalk.yellow('  🤓 NerdSpecs v0.2.0'));
   console.log(chalk.gray('  Put on nerd glasses and the project becomes visible.\n'));
 }
 
@@ -34,13 +35,14 @@ export function createProgram(): Command {
   program
     .name('nerdspecs')
     .description('Put on nerd glasses and the project becomes visible.')
-    .version('0.1.0');
+    .version('0.2.0');
   program.hook('preAction', printHeader);
   registerWriteCommand(program);
   registerReadCommand(program);
   registerThinkCommand(program);
   registerStatusCommand(program);
   registerConfigCommand(program);
+  registerMemoryCommand(program);
   program.action(wrapCommand(runDefaultCommand));
   return program;
 }

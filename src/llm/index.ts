@@ -1,7 +1,7 @@
 // @TASK P2-R5-T2 - LLM Provider Factory
 // @SPEC docs/planning/06-tasks.md
 
-export type { LLMProvider, SummaryContext } from './provider.js';
+export type { LLMProvider, OutputLanguage, SummaryContext } from './provider.js';
 export { ClaudeProvider } from './claude-provider.js';
 export { OpenAIProvider } from './openai-provider.js';
 export { MockProvider } from './mock-provider.js';

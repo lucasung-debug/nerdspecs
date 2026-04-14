@@ -21,6 +21,7 @@ vi.mock('../src/resources/code-analyzer.js', () => ({
 vi.mock('../src/llm/index.js', () => ({
   createLLMProvider: vi.fn().mockResolvedValue({
     generateSummary: vi.fn().mockResolvedValue('A mock summary.'),
+    generatePainPoints: vi.fn().mockResolvedValue('Pain point one\nPain point two\nPain point three'),
   }),
 }));
 
@@ -57,10 +58,37 @@ afterEach(async () => {
 });
 
 describe('runProgress', () => {
+  it('commits the README when auto_push is enabled', async () => {
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false, auto_push: true });
+    const generators = await import('../src/generators/index.js');
+    const commitSpy = vi.spyOn(generators, 'commitReadme').mockResolvedValue(true);
+
+    try {
+      await runProgress(adapter, REPO_SLUG, tmpDir);
+      expect(commitSpy).toHaveBeenCalledWith(tmpDir);
+    } finally {
+      commitSpy.mockRestore();
+    }
+  });
+
+  it('skips committing the README when auto_push is disabled', async () => {
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false, auto_push: false });
+    const generators = await import('../src/generators/index.js');
+    const commitSpy = vi.spyOn(generators, 'commitReadme').mockResolvedValue(true);
+
+    try {
+      await runProgress(adapter, REPO_SLUG, tmpDir);
+      expect(commitSpy).not.toHaveBeenCalled();
+    } finally {
+      commitSpy.mockRestore();
+    }
+  });
+
   it('runs all 5 steps when landing_page_enabled=true', async () => {
     await setConfig(adapter, REPO_SLUG, {
       landing_page_enabled: true,
       landing_page_url: 'https://owner.github.io/test-repo',
+      auto_push: false,
     });
     const { analyzeProject } = await import('../src/resources/code-analyzer.js');
     const { generateProjectSummary } = await import('../src/generators/summary.js');
@@ -74,8 +102,35 @@ describe('runProgress', () => {
     expect(result.landing_page_url).toBe('https://owner.github.io/test-repo/');
   });
 
+  it('supports dry-run mode without writing files', async () => {
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: true, auto_push: true });
+    const generators = await import('../src/generators/index.js');
+    const commitSpy = vi.spyOn(generators, 'commitReadme').mockResolvedValue(true);
+
+    try {
+      const result = await runProgress(adapter, REPO_SLUG, tmpDir, { dryRun: true });
+
+      expect(result.dry_run).toBe(true);
+      expect(result.planned_files).toEqual(['README.md', 'docs/index.html']);
+      await expect(readFile(join(tmpDir, 'README.md'), 'utf8')).rejects.toThrow();
+      await expect(readFile(join(tmpDir, 'docs', 'index.html'), 'utf8')).rejects.toThrow();
+      expect(commitSpy).not.toHaveBeenCalled();
+    } finally {
+      commitSpy.mockRestore();
+    }
+  });
+
+  it('skips landing page generation when no-pages is requested', async () => {
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: true, auto_push: false });
+
+    const result = await runProgress(adapter, REPO_SLUG, tmpDir, { noPages: true });
+
+    expect(result.landing_page_url).toBeUndefined();
+    await expect(readFile(join(tmpDir, 'docs', 'index.html'), 'utf8')).rejects.toThrow();
+  });
+
   it('skips landing steps when landing_page_enabled=false', async () => {
-    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false });
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false, auto_push: false });
     const { analyzeProject } = await import('../src/resources/code-analyzer.js');
 
     const result = await runProgress(adapter, REPO_SLUG, tmpDir);
@@ -86,7 +141,7 @@ describe('runProgress', () => {
   });
 
   it('propagates README generation failures', async () => {
-    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false });
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false, auto_push: false });
     const generators = await import('../src/generators/index.js');
     const generateReadmeSpy = vi.spyOn(generators, 'generateReadme').mockImplementationOnce(() => {
       throw new Error('README generation failed');
@@ -108,6 +163,18 @@ describe('runSuccess', () => {
     expect(output).toContain('55 lines');
   });
 
+  it('shows planned files for dry-run output', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
+    await runSuccess(
+      { readme_lines: 12, dry_run: true, planned_files: ['README.md', 'docs/index.html'], files_analyzed: [] },
+      REPO_SLUG,
+    );
+    const output = consoleSpy.mock.calls.map(c => String(c[0])).join('\n');
+    expect(output).toContain('Dry run complete');
+    expect(output).toContain('Would write: README.md');
+    expect(output).toContain('Would write: docs/index.html');
+  });
+
   it('shows landing page URL when present', async () => {
     const consoleSpy = vi.spyOn(console, 'log');
     await runSuccess(
@@ -117,6 +184,22 @@ describe('runSuccess', () => {
     const output = consoleSpy.mock.calls.map(c => String(c[0])).join('\n');
     expect(output).toContain('https://example.com');
     expect(output).toContain('GitHub Pages');
+  });
+
+  it('shows GitHub Pages setup instructions only on first landing generation', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
+    await runSuccess(
+      {
+        readme_lines: 10,
+        landing_page_url: 'https://example.com',
+        first_landing_generation: true,
+        files_analyzed: [],
+      },
+      REPO_SLUG,
+    );
+    const output = consoleSpy.mock.calls.map(c => String(c[0])).join('\n');
+    expect(output).toContain('https://github.com/owner/test-repo/settings/pages');
+    expect(output).toContain(`Select 'Deploy from a branch' → 'main' → '/docs' folder`);
   });
 
   it('hides landing section when URL is undefined', async () => {
@@ -149,25 +232,39 @@ describe('runAutoMode', () => {
     await setMotivation(adapter, REPO_SLUG, 'I built this to help users.');
     await setConfig(adapter, REPO_SLUG, { landing_page_enabled: true });
     const consoleSpy = vi.spyOn(console, 'log');
+    const generators = await import('../src/generators/index.js');
+    const commitSpy = vi.spyOn(generators, 'commitReadme').mockResolvedValue(true);
 
-    await runAutoMode(adapter, REPO_SLUG, tmpDir);
+    try {
+      await runAutoMode(adapter, REPO_SLUG, tmpDir);
 
-    const lines = consoleSpy.mock.calls.map(c => String(c[0]));
-    expect(lines).toHaveLength(2);
-    expect(lines[0]).toContain('README.md updated');
-    expect(lines[1]).toContain('Landing page ready');
+      const lines = consoleSpy.mock.calls.map(c => String(c[0]));
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toContain('README.md updated');
+      expect(lines[1]).toContain('Landing page ready');
+      expect(commitSpy).toHaveBeenCalledWith(tmpDir);
+    } finally {
+      commitSpy.mockRestore();
+    }
   });
 
   it('prints 1 line on success when landing disabled', async () => {
     await setMotivation(adapter, REPO_SLUG, 'I built this to help users.');
-    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false });
+    await setConfig(adapter, REPO_SLUG, { landing_page_enabled: false, auto_push: false });
     const consoleSpy = vi.spyOn(console, 'log');
+    const generators = await import('../src/generators/index.js');
+    const commitSpy = vi.spyOn(generators, 'commitReadme').mockResolvedValue(true);
 
-    await runAutoMode(adapter, REPO_SLUG, tmpDir);
+    try {
+      await runAutoMode(adapter, REPO_SLUG, tmpDir);
 
-    const lines = consoleSpy.mock.calls.map(c => String(c[0]));
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain('README.md updated');
+      const lines = consoleSpy.mock.calls.map(c => String(c[0]));
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toContain('README.md updated');
+      expect(commitSpy).toHaveBeenCalledWith(tmpDir);
+    } finally {
+      commitSpy.mockRestore();
+    }
   });
 
   it('surfaces underlying exceptions to the command boundary', async () => {

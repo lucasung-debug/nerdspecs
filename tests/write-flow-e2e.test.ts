@@ -36,6 +36,7 @@ vi.mock('../src/resources/code-analyzer.js', () => ({
 vi.mock('../src/llm/index.js', () => ({
   createLLMProvider: vi.fn().mockResolvedValue({
     generateSummary: vi.fn().mockResolvedValue('A sample project summary'),
+    generatePainPoints: vi.fn().mockResolvedValue('Pain A\nPain B\nPain C'),
   }),
 }));
 
