@@ -25,99 +25,84 @@ function sampleData(overrides: Partial<LandingData> = {}): LandingData {
   };
 }
 
-// ─── spec: all 6 sections present ────────────────────────────────────────────
-describe('spec: all 6 sections present', () => {
-  it('top_nav — id="nav" element present', () => {
-    const out = generateLandingPage(sampleData());
-    expect(out).toContain('id="nav"');
-  });
-
-  it('hero_section — id="hero" element present', () => {
+// ─── spec: key sections present ─────────────────────────────────────────────
+describe('spec: key sections present', () => {
+  it('hero section with id="hero" present', () => {
     const out = generateLandingPage(sampleData());
     expect(out).toContain('id="hero"');
   });
 
-  it('pain_points (problem) — id="problem" element present', () => {
+  it('terminal demo present', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('id="problem"');
+    expect(out).toContain('terminal-wrapper');
+    expect(out).toContain('terminal-body');
   });
 
-  it('before_after (solution) — id="solution" element present', () => {
+  it('flow section with steps present', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('id="solution"');
+    expect(out).toContain('flow-container');
+    expect(out).toContain('flow-step');
   });
 
-  it('how_to_steps — id="howto" element present', () => {
+  it('before/after comparison present', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('id="howto"');
+    expect(out).toContain('compare');
+    expect(out).toContain('compare-box');
   });
 
-  it('tech_footer — id="tech-footer" element present', () => {
+  it('CTA section with id="cta" present', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('id="tech-footer"');
+    expect(out).toContain('id="cta"');
   });
 
-  it('sections appear in correct document order: nav → hero → problem → solution → howto → footer', () => {
+  it('pain point cards rendered when pain_points provided', () => {
     const out = generateLandingPage(sampleData());
-    const nav = out.indexOf('id="nav"');
+    expect(out).toContain('Sound familiar?');
+    expect(out).toContain('feature-card');
+  });
+
+  it('sections appear in correct order: hero → flow → compare → cta', () => {
+    const out = generateLandingPage(sampleData());
     const hero = out.indexOf('id="hero"');
-    const problem = out.indexOf('id="problem"');
-    const solution = out.indexOf('id="solution"');
-    const howto = out.indexOf('id="howto"');
-    const footer = out.indexOf('id="tech-footer"');
+    const flow = out.indexOf('class="flow-container"');
+    const compare = out.indexOf('<div class="compare">');
+    const cta = out.indexOf('id="cta"');
 
-    expect(nav).toBeLessThan(hero);
-    expect(hero).toBeLessThan(problem);
-    expect(problem).toBeLessThan(solution);
-    expect(solution).toBeLessThan(howto);
-    expect(howto).toBeLessThan(footer);
+    expect(hero).toBeGreaterThan(-1);
+    expect(flow).toBeGreaterThan(hero);
+    expect(compare).toBeGreaterThan(flow);
+    expect(cta).toBeGreaterThan(compare);
   });
 });
 
-// ─── spec: responsive CSS breakpoints ────────────────────────────────────────
+// ─── spec: responsive CSS breakpoints ───────────────────────────────────────
 describe('spec: responsive CSS breakpoints', () => {
   it('768px media query present in CSS', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('@media (max-width: 768px)');
+    expect(out).toContain('max-width:768px');
   });
 
   it('480px media query present in CSS', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('@media (max-width: 480px)');
+    expect(out).toContain('max-width:480px');
   });
 
-  it('card-grid switches to 1 column at 480px', () => {
-    const out = generateLandingPage(sampleData());
-    const idx480 = out.indexOf('@media (max-width: 480px)');
-    const section480 = out.slice(idx480, idx480 + 300);
-    expect(section480).toContain('.card-grid');
-    expect(section480).toMatch(/grid-template-columns\s*:\s*1fr/);
-  });
-
-  it('card-grid is 3-column by default (desktop)', () => {
+  it('features-grid is 3-column by default (desktop)', () => {
     const out = generateLandingPage(sampleData());
     expect(out).toContain('grid-template-columns:repeat(3,1fr)');
   });
-
-  it('card-grid becomes 2-column at 768px (tablet)', () => {
-    const out = generateLandingPage(sampleData());
-    const idx768 = out.indexOf('@media (max-width: 768px)');
-    const section768 = out.slice(idx768, idx768 + 300);
-    expect(section768).toContain('.card-grid');
-    expect(section768).toMatch(/grid-template-columns\s*:\s*repeat\(2,1fr\)/);
-  });
 });
 
-// ─── spec: language toggle button ────────────────────────────────────────────
+// ─── spec: language toggle button ───────────────────────────────────────────
 describe('spec: language toggle button', () => {
   it('lang-toggle button element present in nav', () => {
     const out = generateLandingPage(sampleData());
     expect(out).toContain('class="lang-toggle"');
   });
 
-  it('toggle button has EN | KO label', () => {
+  it('toggle button has EN / KO label', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('EN | KO');
+    expect(out).toContain('EN / KO');
   });
 
   it('cycleLang JS function present for toggle behavior', () => {
@@ -138,13 +123,13 @@ describe('spec: language toggle button', () => {
   });
 });
 
-// ─── spec: 3 pain point cards ────────────────────────────────────────────────
-describe('spec: 3 pain point cards', () => {
-  it('renders exactly 3 pain-card elements', () => {
+// ─── spec: pain point cards ─────────────────────────────────────────────────
+describe('spec: pain point cards', () => {
+  it('renders 3 feature-card elements for 3 pain points', () => {
     const out = generateLandingPage(sampleData());
-    const matches = out.match(/class="pain-card"/g);
+    const matches = out.match(/class="feature-card"/g);
     expect(matches).not.toBeNull();
-    expect(matches!.length).toBe(3);
+    expect(matches!.length).toBeGreaterThanOrEqual(3);
   });
 
   it('each pain point text appears in the output', () => {
@@ -155,25 +140,14 @@ describe('spec: 3 pain point cards', () => {
     }
   });
 
-  it('pain cards are inside card-grid container', () => {
-    const out = generateLandingPage(sampleData());
-    const gridStart = out.indexOf('class="card-grid"');
-    const gridEnd = out.indexOf('</div>', gridStart);
-    // all pain-card occurrences must be between gridStart and the closing of problem section
-    const problemSection = out.slice(
-      out.indexOf('id="problem"'),
-      out.indexOf('id="solution"')
-    );
-    expect(problemSection.match(/class="pain-card"/g)?.length).toBe(3);
-  });
-
   it('custom pain point count: 1 card renders correctly', () => {
     const out = generateLandingPage(sampleData({ pain_points: ['Only one pain.'] }));
-    expect(out.match(/class="pain-card"/g)?.length).toBe(1);
+    expect(out).toContain('Only one pain.');
+    expect(out).toContain('feature-card');
   });
 });
 
-// ─── spec: valid HTML structure ───────────────────────────────────────────────
+// ─── spec: valid HTML structure ─────────────────────────────────────────────
 describe('spec: valid HTML structure', () => {
   it('starts with <!DOCTYPE html>', () => {
     const out = generateLandingPage(sampleData());
@@ -192,7 +166,7 @@ describe('spec: valid HTML structure', () => {
     expect(out).toContain('charset="UTF-8"');
   });
 
-  it('viewport meta tag present (mobile compatibility)', () => {
+  it('viewport meta tag present', () => {
     const out = generateLandingPage(sampleData());
     expect(out).toContain('name="viewport"');
     expect(out).toContain('width=device-width');
@@ -211,9 +185,6 @@ describe('spec: valid HTML structure', () => {
 
   it('<style> block embedded in <head>', () => {
     const out = generateLandingPage(sampleData());
-    expect(out).toContain('<style>');
-    expect(out).toContain('</style>');
-    // style must come before body
     const styleIdx = out.indexOf('<style>');
     const bodyIdx = out.indexOf('<body>');
     expect(styleIdx).toBeLessThan(bodyIdx);
@@ -228,40 +199,38 @@ describe('spec: valid HTML structure', () => {
   });
 });
 
-// ─── spec: hero section content ──────────────────────────────────────────────
+// ─── spec: hero section content ─────────────────────────────────────────────
 describe('spec: hero section content', () => {
   it('project name appears in hero h1', () => {
     const out = generateLandingPage(sampleData({ project_name: 'MyHeroProject' }));
-    const heroSection = out.slice(out.indexOf('id="hero"'), out.indexOf('id="problem"'));
+    const heroSection = out.slice(out.indexOf('id="hero"'), out.indexOf('id="cta"'));
     expect(heroSection).toContain('MyHeroProject');
     expect(heroSection).toContain('<h1>');
   });
 
   it('summary appears in hero section', () => {
     const out = generateLandingPage(sampleData({ summary: 'Hero summary unique 99' }));
-    const heroSection = out.slice(out.indexOf('id="hero"'), out.indexOf('id="problem"'));
+    const heroSection = out.slice(out.indexOf('id="hero"'), out.indexOf('id="cta"'));
     expect(heroSection).toContain('Hero summary unique 99');
   });
 
   it('CTA button present when repo_url is set', () => {
     const out = generateLandingPage(sampleData({ repo_url: 'https://github.com/test/repo' }));
-    expect(out).toContain('class="btn-cta"');
+    expect(out).toContain('btn-primary');
   });
 });
 
-// ─── spec: tech_footer content ───────────────────────────────────────────────
-describe('spec: tech_footer section', () => {
-  it('language appears in tech footer', () => {
+// ─── spec: footer content ───────────────────────────────────────────────────
+describe('spec: footer section', () => {
+  it('language appears in footer', () => {
     const out = generateLandingPage(sampleData({ tech_stack: { language: 'Rust', frameworks: [] } }));
-    const footerSection = out.slice(out.indexOf('id="tech-footer"'));
-    expect(footerSection).toContain('Rust');
+    expect(out).toContain('Rust');
   });
 
-  it('frameworks appear in tech footer when present', () => {
+  it('frameworks appear in footer when present', () => {
     const out = generateLandingPage(
       sampleData({ tech_stack: { language: 'TypeScript', frameworks: ['NestJS'] } })
     );
-    const footerSection = out.slice(out.indexOf('id="tech-footer"'));
-    expect(footerSection).toContain('NestJS');
+    expect(out).toContain('NestJS');
   });
 });

@@ -20,7 +20,7 @@ async function readExisting(path: string): Promise<string | null> {
 
 function mergeContent(existing: string, generated: string): string {
   const idx = existing.indexOf(MARKER);
-  if (idx === -1) return generated + '\n' + existing;
+  if (idx === -1) return generated;
   return existing.slice(0, idx) + generated;
 }
 

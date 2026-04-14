@@ -40,9 +40,8 @@ async function runInteractiveFlow(storage: StorageAdapter, options: WriteFlowOpt
 }
 
 async function runAutoFlow(storage: StorageAdapter, options: WriteFlowOptions): Promise<void> {
-  const { repo_slug, skip } = await runSetupCheck(storage);
-  if (skip) return;
-  await runAutoMode(storage, repo_slug, process.cwd(), options);
+  const repo_slug = (await import('../commands/helpers.js')).resolveCurrentRepoSlug();
+  await runAutoMode(storage, await repo_slug, process.cwd(), options);
 }
 
 async function runSelectedFlow(storage: StorageAdapter, auto: boolean, options: WriteFlowOptions): Promise<void> {

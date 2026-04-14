@@ -11,15 +11,6 @@ export interface LandingData {
   language_mode: 'en' | 'ko' | 'both';
 }
 
-interface SafeLandingData extends Omit<LandingData, 'project_name' | 'summary' | 'pain_points' | 'tech_stack'> {
-  project_name: string;
-  summary: string;
-  pain_points: string[];
-  tech_stack: { language: string; frameworks: string[] };
-}
-
-const LANGUAGE_MODES = ['en', 'ko', 'both'] as const;
-
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -29,201 +20,241 @@ function escapeHtml(s: string): string {
     .replace(/'/g, '&#x27;');
 }
 
-function normalizeRepoUrl(repoUrl?: string): string | undefined {
-  if (!repoUrl) return undefined;
-
+function normalizeRepoUrl(url?: string): string | undefined {
+  if (!url) return undefined;
   try {
-    const parsed = new URL(repoUrl);
+    const parsed = new URL(url);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
     return parsed.toString();
-  } catch {
-    return undefined;
-  }
+  } catch { return undefined; }
 }
 
-function sanitizeData(data: LandingData): SafeLandingData {
-  return {
-    ...data,
-    project_name: escapeHtml(data.project_name),
-    summary: escapeHtml(data.summary),
-    pain_points: data.pain_points.map((painPoint) => escapeHtml(painPoint)),
-    tech_stack: {
-      language: escapeHtml(data.tech_stack.language),
-      frameworks: data.tech_stack.frameworks.map((framework) => escapeHtml(framework)),
-    },
-    repo_url: normalizeRepoUrl(data.repo_url),
-  };
-}
-
-function normalizeLanguageMode(mode: LandingData['language_mode']): LandingData['language_mode'] {
-  return LANGUAGE_MODES.includes(mode) ? mode : 'en';
-}
-
-function buildNav(data: SafeLandingData): string {
-  const link = data.repo_url
-    ? `<a href="${escapeHtml(data.repo_url)}" class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>`
-    : '';
-  const toggle = `<button class="lang-toggle" onclick="cycleLang()" aria-label="Language toggle">EN | KO</button>`;
-  return `<nav id="nav"><span class="nav-brand">${data.project_name}</span><div class="nav-right">${link}${toggle}</div></nav>`;
-}
-
-function buildHero(data: SafeLandingData): string {
-  const cta = data.repo_url
-    ? `<a href="${escapeHtml(data.repo_url)}" class="btn-cta" target="_blank" rel="noopener noreferrer"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub에서 보기</span></a>`
-    : '';
-  return `<section id="hero">
-  <div data-lang="en"><h1>${data.project_name}</h1><p class="hero-summary">${data.summary}</p>${cta}</div>
-  <div data-lang="ko"><h1>${data.project_name}</h1><p class="hero-summary">${data.summary}</p>${cta}</div>
-</section>`;
-}
-
-function buildPainCard(text: string): string {
-  return `<div class="pain-card"><p data-lang="en">${text}</p><p data-lang="ko">${text}</p></div>`;
-}
-
-function buildProblem(data: SafeLandingData): string {
-  const cards = data.pain_points.map(buildPainCard).join('');
-  return `<section id="problem">
+function buildPainCards(points: string[]): string {
+  if (points.length === 0) return '';
+  const cards = points.map(p => `<div class="feature-card">
+      <p>${p}</p>
+    </div>`).join('\n    ');
+  return `<section>
   <h2 data-lang="en">Sound familiar?</h2>
   <h2 data-lang="ko">이런 경험 있으시죠?</h2>
-  <div class="card-grid">${cards}</div>
+  <div class="features-grid">${cards}</div>
 </section>`;
 }
 
-function buildSolution(): string {
-  return `<section id="solution">
-  <div class="solution-grid">
-    <div class="solution-before">
-      <h3 data-lang="en">Code dump</h3>
-      <h3 data-lang="ko">코드 덤프</h3>
-      <p data-lang="en">Raw files, no context.</p>
-      <p data-lang="ko">파일만 있고, 설명이 없어요.</p>
-    </div>
-    <div class="solution-arrow">→</div>
-    <div class="solution-after">
-      <h3 data-lang="en">Clear explanation</h3>
-      <h3 data-lang="ko">명확한 설명</h3>
-      <p data-lang="en">Human-readable docs, auto-generated.</p>
-      <p data-lang="ko">자동 생성된 읽기 쉬운 문서.</p>
+export function generateLandingPage(data: LandingData): string {
+  const name = escapeHtml(data.project_name);
+  const summary = escapeHtml(data.summary);
+  const pains = data.pain_points.map(p => escapeHtml(p));
+  const lang = escapeHtml(data.tech_stack.language);
+  const fw = data.tech_stack.frameworks.map(f => escapeHtml(f));
+  const fwStr = fw.length > 0 ? ` + ${fw.join(' + ')}` : '';
+  const repo = normalizeRepoUrl(data.repo_url);
+  const repoLink = repo ? escapeHtml(repo) : '';
+  const npmName = name.toLowerCase().replace(/\s+/g, '-');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${name}</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--card:#141414;--border:#222;--accent:#22d3ee;--accent2:#a78bfa;--text:#e5e5e5;--muted:#888;--green:#4ade80;--yellow:#facc15;--pink:#f472b6}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,10,.9);backdrop-filter:blur(12px);z-index:100}
+.nav-brand{font-weight:800;font-size:1.2rem}
+.nav-right{display:flex;gap:.75rem;align-items:center}
+.nav-link{padding:.4rem .8rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;color:var(--text);transition:border-color .2s}
+.nav-link:hover{border-color:var(--accent);text-decoration:none}
+.lang-toggle{cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:.4rem .8rem;background:transparent;color:var(--text);font-size:.85rem;transition:border-color .2s}
+.lang-toggle:hover{border-color:var(--accent)}
+section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+section h2{font-size:2rem;font-weight:800;text-align:center;margin-bottom:.75rem}
+.section-sub{text-align:center;color:var(--muted);margin-bottom:3rem;font-size:1.05rem}
+#hero{text-align:center;padding:6rem 2rem 4rem;position:relative}
+#hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none}
+.badge{display:inline-block;padding:.3rem .8rem;border:1px solid var(--accent);border-radius:20px;font-size:.8rem;color:var(--accent);margin-bottom:1.5rem;letter-spacing:.5px}
+#hero h1{font-size:3.2rem;font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
+.hero-sub{font-size:1.2rem;color:var(--muted);max-width:55ch;margin:0 auto 2rem}
+.btn-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:8px;font-weight:600;font-size:.95rem;transition:all .2s}
+.btn-primary{background:var(--accent);color:#000}
+.btn-primary:hover{opacity:.85;text-decoration:none}
+.btn-secondary{border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--accent);text-decoration:none}
+.terminal-wrapper{max-width:700px;margin:3rem auto 0}
+.terminal{background:#1a1a2e;border-radius:12px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px rgba(34,211,238,.05);border:1px solid #2a2a3e}
+.terminal-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#12122a;border-bottom:1px solid #2a2a3e}
+.terminal-dot{width:12px;height:12px;border-radius:50%}
+.terminal-dot:nth-child(1){background:#ff5f57}
+.terminal-dot:nth-child(2){background:#ffbd2e}
+.terminal-dot:nth-child(3){background:#28c840}
+.terminal-title{margin-left:auto;font-size:.75rem;color:#555}
+.terminal-body{padding:1.25rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.85rem;line-height:1.8;min-height:220px}
+.terminal-body .prompt{color:var(--green)}
+.terminal-body .cmd{color:#fff}
+.terminal-body .output{color:var(--muted)}
+.terminal-body .highlight{color:var(--accent)}
+.terminal-body .success{color:var(--green)}
+.terminal-body .warn{color:var(--yellow)}
+.terminal-body .pink{color:var(--pink)}
+.terminal-body .dim{color:#555}
+.cursor{display:inline-block;width:8px;height:16px;background:var(--accent);animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.flow-container{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:2rem}
+.flow-step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;width:200px;transition:border-color .3s}
+.flow-step:hover{border-color:var(--accent)}
+.flow-icon{font-size:2.5rem;margin-bottom:.75rem}
+.flow-step h3{font-size:.95rem;margin-bottom:.4rem}
+.flow-step p{font-size:.8rem;color:var(--muted)}
+.flow-arrow{font-size:1.5rem;color:var(--muted)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:all .3s}
+.feature-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.feature-icon{font-size:1.8rem;margin-bottom:.75rem}
+.feature-card h3{font-size:1rem;margin-bottom:.5rem}
+.feature-card p{font-size:.85rem;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:2rem;align-items:center;margin-top:2rem}
+.compare-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;min-height:180px}
+.compare-box h3{font-size:1rem;margin-bottom:1rem}
+.compare-box pre{font-family:'Cascadia Code','Fira Code',monospace;font-size:.78rem;color:var(--muted);line-height:1.6;white-space:pre-wrap}
+.compare-arrow{font-size:2.5rem;color:var(--accent);font-weight:200}
+.compare-box.after pre{color:var(--text)}
+.install-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;max-width:400px;margin:2rem auto 0;font-family:'Cascadia Code','Fira Code',monospace}
+.install-box .prompt{color:var(--green)}
+.install-box .cmd{color:#fff;font-size:1.1rem}
+footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem}
+@media(max-width:768px){
+#hero h1{font-size:2.2rem}
+.features-grid{grid-template-columns:1fr}
+.compare{grid-template-columns:1fr;text-align:center}
+.compare-arrow{transform:rotate(90deg)}
+.flow-container{flex-direction:column}
+.flow-arrow{transform:rotate(90deg)}
+.terminal-wrapper{margin:2rem 1rem 0}
+}
+@media(max-width:480px){#hero h1{font-size:1.8rem}nav{padding:.75rem 1rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">${name}</div>
+  <div class="nav-right">
+    ${repoLink ? `<a href="${repoLink}" class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>` : ''}
+    <button class="lang-toggle" onclick="cycleLang()" aria-label="Language toggle">EN / KO</button>
+  </div>
+</nav>
+
+<section id="hero">
+  <h1>${name}</h1>
+  <p class="hero-sub" data-lang="en">${summary}</p>
+  <p class="hero-sub" data-lang="ko">${summary}</p>
+  <div class="btn-group">
+    ${repoLink ? `<a href="${repoLink}" class="btn btn-primary" target="_blank"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub에서 보기</span></a>` : ''}
+    <a href="https://www.npmjs.com/package/${escapeHtml(npmName)}" class="btn btn-secondary" target="_blank">npm</a>
+  </div>
+
+  <div class="terminal-wrapper">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-title">${name} — bash</span>
+      </div>
+      <div class="terminal-body">
+        <span class="prompt">$</span> <span class="cmd">npx ${escapeHtml(npmName)}</span><br>
+        <span class="output">  Language : <span class="highlight">${lang}</span></span><br>
+        <span class="output">  Framework: <span class="highlight">${fw[0] ?? 'none'}</span></span><br><br>
+        <span class="success">✔ Reading project files...</span><br>
+        <span class="success">✔ Analyzing code...</span><br>
+        <span class="success">✔ Generating docs...</span><br><br>
+        <span class="success">✓</span> <span class="cmd">README.md generated</span><br>
+        <span class="success">✓</span> <span class="cmd">Landing page ready</span><span class="cursor"></span>
+      </div>
     </div>
   </div>
-</section>`;
-}
+</section>
 
-function buildHowTo(): string {
-  const steps = [
-    { en: 'Install NerdSpecs', ko: 'NerdSpecs 설치', code: 'npm install -g nerdspecs' },
-    { en: 'Run nerdspecs write', ko: 'nerdspecs write 실행', code: 'nerdspecs write' },
-    { en: 'Share your docs', ko: '문서 공유하기', code: 'git push' },
-  ];
-  const items = steps
-    .map(
-      (s, i) => `<div class="step">
-    <span class="step-num">${i + 1}</span>
-    <h3 data-lang="en">${s.en}</h3>
-    <h3 data-lang="ko">${s.ko}</h3>
-    <code>${s.code}</code>
-  </div>`
-    )
-    .join('');
-  return `<section id="howto">
-  <h2 data-lang="en">How to use</h2>
-  <h2 data-lang="ko">사용법</h2>
-  <div class="step-grid">${items}</div>
-</section>`;
-}
+<section>
+  <h2 data-lang="en">How It Works</h2>
+  <h2 data-lang="ko">작동 방식</h2>
+  <p class="section-sub" data-lang="en">Three steps. One question. Done.</p>
+  <p class="section-sub" data-lang="ko">세 단계. 질문 하나. 끝.</p>
+  <div class="flow-container">
+    <div class="flow-step"><div class="flow-icon">💬</div><h3 data-lang="en">Answer one question</h3><h3 data-lang="ko">질문 하나에 답하기</h3><p data-lang="en">"Why did you build this?"</p><p data-lang="ko">"이걸 왜 만들었나요?"</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">🔍</div><h3 data-lang="en">AI analyzes your code</h3><h3 data-lang="ko">AI가 코드를 분석</h3><p data-lang="en">Scans files, detects stack</p><p data-lang="ko">파일 스캔, 기술 스택 감지</p></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="flow-icon">📄</div><h3 data-lang="en">Docs generated</h3><h3 data-lang="ko">문서 자동 생성</h3><p data-lang="en">README + Landing Page</p><p data-lang="ko">README + 랜딩 페이지</p></div>
+  </div>
+</section>
 
-function buildTechFooter(data: SafeLandingData): string {
-  const fw = data.tech_stack.frameworks.join(', ');
-  return `<footer id="tech-footer">
-  <p data-lang="en">Built with ${data.tech_stack.language}${fw ? ` · ${fw}` : ''}</p>
-  <p data-lang="ko">${data.tech_stack.language}${fw ? ` · ${fw}` : ''}(으)로 제작</p>
-</footer>`;
-}
+<section>
+  <h2 data-lang="en">Before &amp; After</h2>
+  <h2 data-lang="ko">사용 전 &amp; 후</h2>
+  <div class="compare">
+    <div class="compare-box">
+      <h3 data-lang="en">😵 Before</h3>
+      <h3 data-lang="ko">😵 사용 전</h3>
+      <pre>my-project/
+├── src/
+│   ├── index.ts      <span style="color:var(--muted)">// ???</span>
+│   ├── handler.ts    <span style="color:var(--muted)">// ???</span>
+│   └── utils.ts      <span style="color:var(--muted)">// ???</span>
+├── package.json
+└── README.md          <span style="color:var(--pink)">// (empty)</span></pre>
+    </div>
+    <div class="compare-arrow">→</div>
+    <div class="compare-box after">
+      <h3 data-lang="en">🤓 After</h3>
+      <h3 data-lang="ko">🤓 적용 후</h3>
+      <pre><span style="color:var(--green)">✓</span> <span style="color:var(--accent)">README.md</span> — generated
+  What is this? Who is it for?
+  Install &amp; usage instructions
 
-function baseCSS(): string {
-  return `
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;color:#1a1a1a;background:#fff;line-height:1.6}
-a{color:inherit;text-decoration:none}
-nav#nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:100}
-.nav-brand{font-weight:700;font-size:1.1rem}
-.nav-right{display:flex;gap:1rem;align-items:center}
-.nav-link{padding:.4rem .8rem;border:1px solid #ccc;border-radius:6px;font-size:.875rem}
-.lang-toggle{cursor:pointer;border:1px solid #ccc;border-radius:6px;padding:.4rem .8rem;background:#f5f5f5;font-size:.875rem}
-section{padding:4rem 2rem;max-width:1100px;margin:0 auto}
-#hero{text-align:center}
-#hero h1{font-size:2.5rem;font-weight:800;margin-bottom:1rem}
-.hero-summary{font-size:1.125rem;color:#555;max-width:60ch;margin:0 auto 1.5rem}
-.btn-cta{display:inline-block;background:#111;color:#fff;padding:.75rem 1.5rem;border-radius:8px;font-weight:600;transition:opacity .2s}
-.btn-cta:hover{opacity:.8}
-.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2rem}
-.pain-card{border:1px solid #eee;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.solution-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:2rem;align-items:center;margin-top:2rem}
-.solution-before,.solution-after{border:1px solid #eee;border-radius:12px;padding:1.5rem}
-.solution-arrow{font-size:2rem;color:#999}
-.step-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2rem}
-.step{border:1px solid #eee;border-radius:12px;padding:1.5rem;text-align:center}
-.step-num{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:50%;background:#111;color:#fff;font-weight:700;margin-bottom:.75rem}
-.step code{display:block;margin-top:.75rem;background:#f5f5f5;padding:.5rem;border-radius:6px;font-size:.85rem}
-footer#tech-footer{text-align:center;padding:2rem;border-top:1px solid #eee;color:#888;font-size:.875rem}`;
-}
+<span style="color:var(--green)">✓</span> <span style="color:var(--accent)">docs/index.html</span>
+  Landing page with dark theme
+  Bilingual (EN/KO)</pre>
+    </div>
+  </div>
+</section>
 
-function responsiveCSS(): string {
-  return `
-@media (max-width: 768px){
-.card-grid{grid-template-columns:repeat(2,1fr)}
-.solution-grid{grid-template-columns:1fr;text-align:center}
-.solution-arrow{transform:rotate(90deg)}
-.step-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media (max-width: 480px){
-.card-grid{grid-template-columns:1fr}
-.step-grid{grid-template-columns:1fr}
-#hero h1{font-size:1.75rem}
-}`;
-}
+${buildPainCards(pains)}
 
-function buildCSS(): string {
-  return `<style>${baseCSS()}${responsiveCSS()}</style>`;
-}
+<section id="cta" style="text-align:center">
+  <h2 data-lang="en">Get Started</h2>
+  <h2 data-lang="ko">시작하기</h2>
+  <p class="section-sub" data-lang="en">No config needed. Just run it.</p>
+  <p class="section-sub" data-lang="ko">설정 필요 없음. 바로 실행하세요.</p>
+  <div class="install-box">
+    <span class="prompt">$</span> <span class="cmd">npx ${escapeHtml(npmName)}</span><span class="cursor"></span>
+  </div>
+</section>
 
-function buildScript(mode: LandingData['language_mode']): string {
-  const safeMode = JSON.stringify(normalizeLanguageMode(mode));
+<footer>
+  <p>Built with ${lang}${fwStr} · <a href="${repoLink}">GitHub</a></p>
+</footer>
 
-  return `<script>
-var LANGS=['en','ko','both'];
+<script>
+var LANGS=['en','ko'];
 function showLang(l){
   document.querySelectorAll('[data-lang]').forEach(function(el){
-    var lang=el.getAttribute('data-lang');
-    el.style.display=(l==='both'||lang===l)?'':'none';
+    el.style.display=el.getAttribute('data-lang')===l?'':'none';
   });
+  document.querySelector('.lang-toggle').textContent=l==='en'?'EN → KO':'KO → EN';
   localStorage.setItem('nerdspecs-lang',l);
 }
 function cycleLang(){
   var cur=localStorage.getItem('nerdspecs-lang')||'en';
-  var next=LANGS[(LANGS.indexOf(cur)+1)%LANGS.length];
-  showLang(next);
+  showLang(cur==='en'?'ko':'en');
 }
-function toggleLang(l){showLang(l);}
-showLang(localStorage.getItem('nerdspecs-lang')||${safeMode});
-</script>`;
-}
-
-export function generateLandingPage(data: LandingData): string {
-  const safeData = sanitizeData(data);
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeData.project_name}</title>${buildCSS()}</head>
-<body>
-${buildNav(safeData)}
-${buildHero(safeData)}
-${buildProblem(safeData)}
-${buildSolution()}
-${buildHowTo()}
-${buildTechFooter(safeData)}
-${buildScript(data.language_mode)}
+showLang(localStorage.getItem('nerdspecs-lang')||'en');
+</script>
 </body>
 </html>`;
 }

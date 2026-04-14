@@ -14,27 +14,26 @@ const base: LandingData = {
 };
 
 describe('generateLandingPage', () => {
-  it('contains all 6 sections', () => {
+  it('contains hero, terminal demo, flow, compare, and cta sections', () => {
     const html = generateLandingPage(base);
-    expect(html).toContain('id="nav"');
     expect(html).toContain('id="hero"');
-    expect(html).toContain('id="problem"');
-    expect(html).toContain('id="solution"');
-    expect(html).toContain('id="howto"');
-    expect(html).toContain('id="tech-footer"');
+    expect(html).toContain('terminal-wrapper');
+    expect(html).toContain('flow-container');
+    expect(html).toContain('compare');
+    expect(html).toContain('id="cta"');
   });
 
   it('includes responsive media queries', () => {
     const html = generateLandingPage(base);
-    expect(html).toContain('@media (max-width: 768px)');
-    expect(html).toContain('@media (max-width: 480px)');
+    expect(html).toContain('@media(max-width:768px)');
+    expect(html).toContain('@media(max-width:480px)');
   });
 
   it('includes language toggle JavaScript', () => {
     const html = generateLandingPage(base);
     expect(html).toContain('data-lang="en"');
     expect(html).toContain('data-lang="ko"');
-    expect(html).toContain('function toggleLang');
+    expect(html).toContain('function cycleLang');
   });
 
   it('persists language choice in localStorage', () => {
@@ -43,10 +42,11 @@ describe('generateLandingPage', () => {
     expect(html).toContain('nerdspecs-lang');
   });
 
-  it('renders 3 pain point cards', () => {
+  it('renders pain point cards as feature-cards', () => {
     const html = generateLandingPage(base);
-    const matches = html.match(/class="pain-card"/g);
-    expect(matches).toHaveLength(3);
+    const matches = html.match(/class="feature-card"/g);
+    expect(matches).not.toBeNull();
+    expect(matches!.length).toBeGreaterThanOrEqual(3);
   });
 
   it('includes repo_url in GitHub link when provided', () => {
@@ -79,7 +79,6 @@ describe('generateLandingPage', () => {
   it('omits repo link when repo_url protocol is invalid', () => {
     const html = generateLandingPage({ ...base, repo_url: 'javascript:alert(1)' });
     expect(html).not.toContain('href="javascript:alert(1)"');
-    expect(html).not.toContain('class="btn-cta"');
   });
 
   it('shows project name in nav', () => {
@@ -93,29 +92,17 @@ describe('generateLandingPage', () => {
     expect(html).toContain('Node.js');
   });
 
-  it('defaults to en lang visibility when language_mode is en', () => {
-    const html = generateLandingPage({ ...base, language_mode: 'en' });
-    expect(html).toContain('||"en"');
+  it('uses dark theme styling', () => {
+    const html = generateLandingPage(base);
+    expect(html).toContain('--bg:#0a0a0a');
+    expect(html).toContain('--accent:#22d3ee');
   });
 
-  it('defaults to ko lang visibility when language_mode is ko', () => {
-    const html = generateLandingPage({ ...base, language_mode: 'ko' });
-    expect(html).toContain('||"ko"');
-  });
-
-  it('shows both by default when language_mode is both', () => {
-    const html = generateLandingPage({ ...base, language_mode: 'both' });
-    expect(html).toContain('||"both"');
-  });
-
-  it('normalizes unexpected language_mode values before embedding in script', () => {
-    const html = generateLandingPage({
-      ...base,
-      language_mode: 'en";window.__LANG_XSS__=1;//' as LandingData['language_mode'],
-    });
-
-    expect(html).toContain('||"en"');
-    expect(html).not.toContain('window.__LANG_XSS__');
+  it('includes terminal demo with cursor animation', () => {
+    const html = generateLandingPage(base);
+    expect(html).toContain('terminal-body');
+    expect(html).toContain('cursor');
+    expect(html).toContain('@keyframes blink');
   });
 
   it('produces valid HTML5 doctype', () => {

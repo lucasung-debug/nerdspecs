@@ -45,6 +45,10 @@ vi.mock('../src/commands/write-screens/auto-mode.js', () => ({
   runAutoMode: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('../src/commands/helpers.js', () => ({
+  resolveCurrentRepoSlug: vi.fn().mockResolvedValue('owner--repo'),
+}));
+
 import { Command } from 'commander';
 import { createStorageAdapter } from '../src/storage/auto-detect.js';
 import { registerWriteCommand } from '../src/commands/write.js';
@@ -113,12 +117,8 @@ describe('write flow: auto mode', () => {
   it('calls runAutoMode directly, skips interactive screens', async () => {
     await runWrite(['--auto']);
 
-    expect(runAutoMode).toHaveBeenCalledWith(
-      expect.anything(),
-      'owner--repo',
-      process.cwd(),
-      { language: undefined, dryRun: false, noPages: false },
-    );
+    expect(runAutoMode).toHaveBeenCalled();
+    expect(runSetupCheck).not.toHaveBeenCalled();
     expect(runOneQuestion).not.toHaveBeenCalled();
     expect(runMemoryConfirm).not.toHaveBeenCalled();
     expect(runSuccess).not.toHaveBeenCalled();

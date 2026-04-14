@@ -145,9 +145,9 @@ async function getDependencies(dir: string): Promise<string[]> {
 }
 
 function detectFrameworks(deps: string[]): string[] {
-  const lower = deps.map(d => d.toLowerCase());
+  const names = new Set(deps.map(d => d.toLowerCase().split('/').pop() ?? d.toLowerCase()));
   return FRAMEWORK_MAP
-    .filter(([key]) => lower.some(d => d.includes(key)))
+    .filter(([key]) => names.has(key))
     .map(([, label]) => label);
 }
 

@@ -35,9 +35,6 @@ const LABELS = {
 
 function heroSection(data: ReadmeData): string {
   if (!data.sections.hero) return '';
-  if (data.language_mode === 'both') {
-    return `# ${data.project_name}\n\n${data.summary}\n\n---\n\n${data.summary}\n`;
-  }
   return `# ${data.project_name}\n\n${data.summary}\n`;
 }
 
@@ -83,21 +80,15 @@ function usageCommand(lang: string): string {
 function installationSection(data: ReadmeData): string {
   if (!data.sections.installation) return '';
   const cmd = installCommand(data.tech_stack.language);
-  const en = `## ${LABELS.en.installation}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
-  const ko = `## ${LABELS.ko.installation}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
-  if (data.language_mode === 'en') return en + '\n';
-  if (data.language_mode === 'ko') return ko + '\n';
-  return `${en}\n\n---\n\n${ko}\n`;
+  const label = data.language_mode === 'ko' ? LABELS.ko.installation : LABELS.en.installation;
+  return `## ${label}\n\n\`\`\`bash\n${cmd}\n\`\`\`\n`;
 }
 
 function howToUseSection(data: ReadmeData): string {
   if (!data.sections.how_to_use) return '';
   const cmd = usageCommand(data.tech_stack.language);
-  const en = `## ${LABELS.en.howToUse}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
-  const ko = `## ${LABELS.ko.howToUse}\n\n\`\`\`bash\n${cmd}\n\`\`\``;
-  if (data.language_mode === 'en') return en + '\n';
-  if (data.language_mode === 'ko') return ko + '\n';
-  return `${en}\n\n---\n\n${ko}\n`;
+  const label = data.language_mode === 'ko' ? LABELS.ko.howToUse : LABELS.en.howToUse;
+  return `## ${label}\n\n\`\`\`bash\n${cmd}\n\`\`\`\n`;
 }
 
 function techStackList(ts: ReadmeData['tech_stack']): string {
