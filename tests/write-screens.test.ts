@@ -12,14 +12,6 @@ vi.mock('inquirer', () => ({
   },
 }));
 
-vi.mock('../src/resources/project-config.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/resources/project-config.js')>();
-  return {
-    ...actual,
-    deriveRepoSlug: vi.fn().mockResolvedValue('test-owner--test-repo'),
-  };
-});
-
 vi.mock('../src/commands/helpers.js', () => ({
   resolveCurrentRepoSlug: vi.fn().mockResolvedValue('test-owner--test-repo'),
 }));

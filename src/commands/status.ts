@@ -41,7 +41,7 @@ export async function runStatusCommand(storage: StorageAdapter, slug?: string): 
   console.log(formatStatusRow('Project', metadata?.display_name ?? currentSlug));
   console.log(formatStatusRow('Repo URL', metadata?.repo_url ?? null));
   printSection('Hook status');
-  console.log(formatStatusRow('mnemo-hook', getMnemoHookConnectionState(storage)));
+  console.log(formatStatusRow('mnemo-hook', getMnemoHookConnectionState()));
   console.log(formatStatusRow('Git hook', config?.hook_installed ?? null));
   console.log(formatStatusRow('Auto push', config?.auto_push ?? null));
   printSection('Memory stats');

@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { resolveCurrentRepoSlug } from './commands/helpers.js';
 import { LocalFileAdapter } from './storage/local-file-adapter.js';
-import { MnemoHookAdapter } from './storage/mnemo-hook-adapter.js';
 import type { StorageAdapter } from './storage/adapter.js';
 
 interface ErrorEntry {
@@ -128,12 +127,6 @@ function extractLanguagePreference(args: readonly unknown[]): ErrorDisplayLangua
 }
 
 function createErrorStorageAdapter(): StorageAdapter | undefined {
-  try {
-    return new MnemoHookAdapter();
-  } catch (error) {
-    if (!(error instanceof Error) || !/mnemo-hook/i.test(error.message)) return undefined;
-  }
-
   try {
     return new LocalFileAdapter();
   } catch {

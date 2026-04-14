@@ -40,7 +40,7 @@ async function runInteractiveFlow(storage: StorageAdapter, options: WriteFlowOpt
 }
 
 async function runAutoFlow(storage: StorageAdapter, options: WriteFlowOptions): Promise<void> {
-  const repo_slug = (await import('../commands/helpers.js')).resolveCurrentRepoSlug();
+  const repo_slug = (await import('./helpers.js')).resolveCurrentRepoSlug();
   await runAutoMode(storage, await repo_slug, process.cwd(), options);
 }
 

@@ -1,12 +1,8 @@
 // @TASK P1-R2-T1 - ProjectConfig resource
 // @SPEC docs/planning/06-tasks.md#P1-R2-T1
 
-import { exec } from 'node:child_process';
-import { promisify } from 'node:util';
 import type { StorageAdapter } from '../storage/adapter.js';
 import { nowIso } from '../utils.js';
-
-const execAsync = promisify(exec);
 
 export interface ProjectConfig {
   language: 'en' | 'ko' | 'both';
@@ -44,11 +40,6 @@ export function parseRepoSlug(url: string): string {
   const match = url.match(/[:/]([^/]+)\/([^/]+?)(?:\.git)?$/);
   if (!match) throw new Error(`Cannot parse git remote URL: ${url}`);
   return `${match[1]}--${match[2]}`;
-}
-
-export async function deriveRepoSlug(): Promise<string> {
-  const { stdout } = await execAsync('git remote get-url origin');
-  return parseRepoSlug(stdout.trim());
 }
 
 export async function getConfig(

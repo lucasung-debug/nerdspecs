@@ -5,6 +5,7 @@ import type { StorageAdapter } from '../storage/adapter.js';
 import { setPreferences } from '../resources/user-preferences.js';
 import { renderHeader, selectionPrompt } from '../components/index.js';
 import { getMnemoHookConnectionState } from '../storage/auto-detect.js';
+import { t } from '../i18n.js';
 
 const LANGUAGE_CHOICES = ['English', '한국어', '中文', 'Both (EN + KO)'] as const;
 type LanguageChoice = (typeof LANGUAGE_CHOICES)[number];
@@ -22,22 +23,22 @@ export async function isOnboardingNeeded(storage: StorageAdapter): Promise<boole
 }
 
 export async function runOnboarding(storage: StorageAdapter): Promise<void> {
-  renderHeader('0.1.0');
-  console.log("Welcome to NerdSpecs! Let's set things up.");
+  renderHeader('0.3.0');
+  console.log(t('welcome', 'en'));
 
-  console.log('Step 1/4: Choose your language');
-  const choice = await selectionPrompt('Choose your language', [...LANGUAGE_CHOICES]);
+  console.log(t('stepLang', 'en'));
+  const choice = await selectionPrompt(t('chooseLang', 'en'), [...LANGUAGE_CHOICES]);
+  const lang = mapLanguage(choice as LanguageChoice);
 
-  console.log('Step 2/4: Save your preferences');
-  await setPreferences(storage, { language: mapLanguage(choice as LanguageChoice) });
+  console.log(t('stepSave', lang));
+  await setPreferences(storage, { language: lang });
 
-  console.log('Step 3/4: Check mnemo-hook connection');
-  console.log(`mnemo-hook: ${getMnemoHookConnectionState()}`);
-  console.log('Storage: local file (.nerdspecs/)');
+  console.log(t('stepCheck', lang));
+  console.log(`Storage: local file (.nerdspecs/)`);
 
-  console.log('Step 4/4: Quick reference');
+  console.log(t('stepRef', lang));
   console.log('nerdspecs write');
   console.log('nerdspecs read');
   console.log('nerdspecs status');
-  console.log("You're all set! Run `nerdspecs write` to get started.");
+  console.log(t('allSet', lang));
 }

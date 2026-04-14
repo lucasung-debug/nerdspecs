@@ -19,14 +19,6 @@ export interface ProjectMetadata {
 
 const key = (slug: string) => `project_metadata::${slug}`;
 
-export async function getMetadata(storage: StorageAdapter, repoSlug: string): Promise<ProjectMetadata | null> {
-  return storage.get<ProjectMetadata>(key(repoSlug));
-}
-
-export async function setMetadata(storage: StorageAdapter, repoSlug: string, data: ProjectMetadata): Promise<void> {
-  return storage.set(key(repoSlug), data);
-}
-
 export async function deleteMetadata(storage: StorageAdapter, repoSlug: string): Promise<void> {
   return storage.delete(key(repoSlug));
 }

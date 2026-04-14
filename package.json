@@ -11,8 +11,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist/",
-    "bin/",
-    "templates/"
+    "bin/"
   ],
   "scripts": {
     "build": "tsc",
