@@ -2,83 +2,169 @@
 
 > Put on nerd glasses and the project becomes visible.
 
-I created NerdSpecs to help people who aren't programmers understand what their AI-generated code actually does! It's like having a friendly translator that reads through complex code and explains it in plain English, so you can know what your project is really doing under the hood.
+NerdSpecs is an MCP server that turns your AI-built project into human-readable documentation. Works with **any AI CLI** — Claude Code, Gemini CLI, Codex, OpenCode, Qwen Code, Cursor, VS Code, and more.
 
-비개발자들이 AI로 만든 프로젝트가 실제로 무엇을 하는지 이해할 수 있도록 NerdSpecs를 만들었어요! 복잡한 코드를 읽어서 쉬운 말로 설명해주는 친근한 번역기 같은 것으로, 여러분의 프로젝트가 실제로 어떤 일을 하는지 알 수 있게 해줍니다.
+**Zero API keys. Zero config. Just add it and say "make a README for this project."**
 
-**[Live Demo (Landing Page)](https://lucasung-debug.github.io/nerdspecs/)**
+**[Live Demo](https://lucasung-debug.github.io/nerdspecs/)** · **[npm](https://www.npmjs.com/package/nerdspecs)**
 
-## Install
+## Quick Start
+
+Add NerdSpecs to your AI CLI config, then ask it to generate docs.
+
+### Claude Code / Gemini CLI / Qwen Code / Cursor
+
+Add to your config file (`.mcp.json`, `~/.gemini/settings.json`, etc.):
+
+```json
+{
+  "mcpServers": {
+    "nerdspecs": {
+      "command": "npx",
+      "args": ["-y", "nerdspecs"]
+    }
+  }
+}
+```
+
+### OpenAI Codex CLI
+
+Add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.nerdspecs]
+command = "npx"
+args = ["-y", "nerdspecs"]
+```
+
+### VS Code (GitHub Copilot)
+
+Add to `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "nerdspecs": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "nerdspecs"]
+    }
+  }
+}
+```
+
+Then just say:
+
+> "Analyze this project and generate a README and landing page."
+
+## MCP Tools
+
+NerdSpecs provides 8 tools that your AI assistant can use:
+
+| Tool | What it does |
+|------|-------------|
+| `analyze_project` | Scan project files — detect language, framework, dependencies |
+| `generate_readme` | Generate README.md with bilingual support (EN/KO/ZH) |
+| `generate_landing_page` | Generate dark-themed landing page with terminal demo |
+| `fetch_repo_metadata` | Fetch GitHub repo info for the AI to explain |
+| `save_decision` | Record adopt/skip/watch decisions for projects |
+| `get_project_status` | Check current config and stored motivation |
+| `auto_commit_and_push` | Commit and push docs in one step (for non-developers) |
+| `suggest_next_steps` | Analyze project state and suggest what to do next |
+
+## How It Works
+
+```
+Your AI CLI (Claude/Gemini/Codex/etc.)
+        |
+  NerdSpecs analyzes your code
+        |
+  AI writes the summary
+        |
+  NerdSpecs renders templates
+        |
+  README.md + Landing Page
+```
+
+The key difference: **your AI CLI IS the LLM**. NerdSpecs doesn't call any AI API — it provides code analysis and template rendering. Your CLI generates the summaries using its own intelligence.
+
+## Features
+
+- **Works with any MCP-compatible CLI** — Claude Code, Gemini, Codex, OpenCode, Qwen Code, Cursor, VS Code
+- **Zero API keys required** — your CLI already has authentication
+- **Trilingual** — English, Korean, Chinese (EN/KO/ZH)
+- **Dark-themed landing page** — terminal demo, before/after comparison, feature cards
+- **Image slots** — `hero_image_url` and `screenshots` for Gemini MCP / Pencil / design tools
+- **Non-developer friendly** — "push this for me" auto-commits and pushes
+- **Smart suggestions** — tells you what to do next (missing README? uncommitted changes?)
+- **Project memory** — remembers your answers across sessions
+
+## Image Integration
+
+NerdSpecs doesn't generate images — it provides slots that other tools can fill:
+
+```
+Your AI decides:
+  ├─ Gemini MCP available → generate hero image → hero_image_url
+  ├─ Pencil MCP available → design screenshots → screenshots[]
+  ├─ Design skill available → create visuals → pass URLs
+  └─ Nothing available → NerdSpecs terminal demo UI (default)
+```
+
+## Standalone CLI
+
+NerdSpecs also works as a standalone CLI tool:
 
 ```bash
 npx nerdspecs
 ```
 
-Or install globally:
-
-```bash
-npm install -g nerdspecs
-```
-
-## Commands
-
 | Command | What it does |
 |---------|-------------|
-| `nerdspecs write` | Generate README + landing page for your project |
-| `nerdspecs read <url>` | Get a plain-language explanation of any GitHub project |
-| `nerdspecs think <url>` | Record why you're adopting or skipping a project |
-| `nerdspecs status` | Show current NerdSpecs configuration |
-| `nerdspecs config` | Manage language, auto-push, and landing page settings |
+| `nerdspecs write` | Generate README + landing page (requires API key) |
+| `nerdspecs read <url>` | Explain any GitHub project |
+| `nerdspecs think <url>` | Record project adoption decisions |
+| `nerdspecs status` | Show configuration |
+| `nerdspecs config` | Manage settings |
 | `nerdspecs memory` | View or clear stored data |
-
-Running `nerdspecs` with no arguments opens an interactive menu.
-
-## Features
-
-- **One Question Onboarding** — just answer "why did you build this?"
-- **Bilingual Output** — English, Korean, or both
-- **Multiple LLM Providers** — Claude, OpenAI, or offline mode (no API key needed)
-- **Landing Page Generator** — static HTML page ready for GitHub Pages
-- **Auto-Push** — hook into git to regenerate docs on push
-- **Project Memory** — remembers your answers across sessions
-
-## LLM Setup
-
-NerdSpecs auto-detects your API key from environment variables:
-
-| Provider | Environment Variable |
-|----------|---------------------|
-| Claude (default) | `ANTHROPIC_API_KEY` or `CLAUDE_API_KEY` |
-| OpenAI | `OPENAI_API_KEY` |
-| Offline | No key needed (template-based output) |
-
-## How It Works
-
-```
-You answer one question
-        |
-  Code analysis runs
-        |
-  LLM generates summary
-        |
-  README.md + index.html
-```
-
-1. **Write** — Analyzes your repo (language, tech stack, structure), combines it with your motivation, and generates docs
-2. **Read** — Fetches a GitHub repo and explains it like you're not a developer
-3. **Think** — Helps you decide whether to adopt, skip, or watch a project
 
 <details><summary>Tech Stack</summary>
 
 - **Runtime**: Node.js 18+ (TypeScript, ESM)
+- **MCP**: @modelcontextprotocol/sdk + zod
 - **CLI**: Commander + Inquirer + Chalk + Ora
-- **LLM**: Pluggable abstraction (Claude / OpenAI / Mock)
-- **Storage**: mnemo-hook or local JSON
+- **Templates**: README (Markdown) + Landing Page (HTML)
+- **Storage**: Local JSON (`.nerdspecs/memory.json`)
 
 </details>
+
+## Compatibility Matrix
+
+| CLI Tool | Config File | Format |
+|----------|------------|--------|
+| Claude Code | `.mcp.json` or `~/.claude.json` | JSON (`mcpServers`) |
+| Gemini CLI | `~/.gemini/settings.json` | JSON (`mcpServers`) |
+| Qwen Code | `~/.qwen/settings.json` | JSON (`mcpServers`) |
+| Cursor | `~/.cursor/mcp.json` | JSON (`mcpServers`) |
+| OpenCode | `opencode.json` | JSON (`mcp`) |
+| Codex CLI | `~/.codex/config.toml` | TOML (`[mcp_servers]`) |
+| VS Code | `.vscode/mcp.json` | JSON (`servers`) |
+| Continue | `.continue/mcpServers/*.json` | JSON (`mcpServers`) |
+| Cline | VS Code globalStorage | JSON (`mcpServers`) |
 
 ## License
 
 MIT
+
+---
+
+<div align="center">
+  <pre>
+   ╭─────╮ ╭─────╮
+   │ ●   │─│   ● │
+   ╰─────╯ ╰─────╯
+  </pre>
+  <sub>Made with <a href="https://www.npmjs.com/package/nerdspecs">NerdSpecs</a> — Put on nerd glasses and the project becomes visible.</sub>
+</div>
 
 <!-- Generated by NerdSpecs -->
