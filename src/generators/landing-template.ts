@@ -8,7 +8,9 @@ export interface LandingData {
   pain_points: string[];
   tech_stack: { language: string; frameworks: string[] };
   repo_url?: string;
-  language_mode: 'en' | 'ko' | 'both';
+  language_mode: 'en' | 'ko' | 'zh' | 'both';
+  hero_image_url?: string;
+  screenshots?: string[];
 }
 
 function escapeHtml(s: string): string {
@@ -51,6 +53,8 @@ export function generateLandingPage(data: LandingData): string {
   const repo = normalizeRepoUrl(data.repo_url);
   const repoLink = repo ? escapeHtml(repo) : '';
   const npmName = name.toLowerCase().replace(/\s+/g, '-');
+  const heroImg = data.hero_image_url ? normalizeRepoUrl(data.hero_image_url) : undefined;
+  const screens = (data.screenshots ?? []).map(s => normalizeRepoUrl(s)).filter(Boolean) as string[];
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -158,7 +162,9 @@ footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:v
     <a href="https://www.npmjs.com/package/${escapeHtml(npmName)}" class="btn btn-secondary" target="_blank">npm</a>
   </div>
 
-  <div class="terminal-wrapper">
+  ${heroImg
+    ? `<div class="terminal-wrapper"><img src="${escapeHtml(heroImg)}" alt="${name}" style="width:100%;border-radius:12px;border:1px solid #2a2a3e"></div>`
+    : `<div class="terminal-wrapper">
     <div class="terminal">
       <div class="terminal-bar">
         <span class="terminal-dot"></span>
@@ -177,7 +183,7 @@ footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:v
         <span class="success">✓</span> <span class="cmd">Landing page ready</span><span class="cursor"></span>
       </div>
     </div>
-  </div>
+  </div>`}
 </section>
 
 <section>
@@ -226,11 +232,20 @@ footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:v
 
 ${buildPainCards(pains)}
 
+${screens.length > 0 ? `<section>
+  <h2 data-lang="en">Screenshots</h2>
+  <h2 data-lang="ko">스크린샷</h2>
+  <h2 data-lang="zh">截图</h2>
+  <div class="features-grid">${screens.map(s => `<div class="feature-card" style="padding:0;overflow:hidden"><img src="${escapeHtml(s)}" alt="Screenshot" style="width:100%;display:block"></div>`).join('')}</div>
+</section>` : ''}
+
 <section id="cta" style="text-align:center">
   <h2 data-lang="en">Get Started</h2>
   <h2 data-lang="ko">시작하기</h2>
+  <h2 data-lang="zh">开始使用</h2>
   <p class="section-sub" data-lang="en">No config needed. Just run it.</p>
   <p class="section-sub" data-lang="ko">설정 필요 없음. 바로 실행하세요.</p>
+  <p class="section-sub" data-lang="zh">无需配置。直接运行。</p>
   <div class="install-box">
     <span class="prompt">$</span> <span class="cmd">npx ${escapeHtml(npmName)}</span><span class="cursor"></span>
   </div>
@@ -241,7 +256,7 @@ ${buildPainCards(pains)}
 </footer>
 
 <script>
-var LANGS=['en','ko'];
+var LANGS=['en','ko','zh'];
 function showLang(l){
   document.querySelectorAll('[data-lang]').forEach(function(el){
     el.style.display=el.getAttribute('data-lang')===l?'':'none';

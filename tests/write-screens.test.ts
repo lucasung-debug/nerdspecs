@@ -20,6 +20,10 @@ vi.mock('../src/resources/project-config.js', async (importOriginal) => {
   };
 });
 
+vi.mock('../src/commands/helpers.js', () => ({
+  resolveCurrentRepoSlug: vi.fn().mockResolvedValue('test-owner--test-repo'),
+}));
+
 vi.mock('../src/resources/code-analyzer.js', () => ({
   analyzeProject: vi.fn().mockResolvedValue({
     primary_language: 'TypeScript',

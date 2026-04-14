@@ -6,12 +6,13 @@ import { setPreferences } from '../resources/user-preferences.js';
 import { renderHeader, selectionPrompt } from '../components/index.js';
 import { getMnemoHookConnectionState } from '../storage/auto-detect.js';
 
-const LANGUAGE_CHOICES = ['English', '한국어', 'Both (EN + KO)'] as const;
+const LANGUAGE_CHOICES = ['English', '한국어', '中文', 'Both (EN + KO)'] as const;
 type LanguageChoice = (typeof LANGUAGE_CHOICES)[number];
 
-function mapLanguage(choice: LanguageChoice): 'en' | 'ko' | 'both' {
+function mapLanguage(choice: LanguageChoice): 'en' | 'ko' | 'zh' | 'both' {
   if (choice === 'English') return 'en';
   if (choice === '한국어') return 'ko';
+  if (choice === '中文') return 'zh';
   return 'both';
 }
 

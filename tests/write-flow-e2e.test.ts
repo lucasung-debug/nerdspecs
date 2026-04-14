@@ -21,6 +21,10 @@ vi.mock('../src/resources/project-config.js', async (importOriginal) => {
   };
 });
 
+vi.mock('../src/commands/helpers.js', () => ({
+  resolveCurrentRepoSlug: vi.fn().mockResolvedValue('e2e-owner--e2e-repo'),
+}));
+
 vi.mock('../src/resources/code-analyzer.js', () => ({
   analyzeProject: vi.fn().mockResolvedValue({
     primary_language: 'TypeScript',

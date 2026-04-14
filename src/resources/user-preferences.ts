@@ -5,7 +5,7 @@ import type { StorageAdapter } from '../storage/adapter.js';
 import { nowIso } from '../utils.js';
 
 export interface UserPreferences {
-  language: 'en' | 'ko' | 'both';
+  language: 'en' | 'ko' | 'zh' | 'both';
   ask_why_built: boolean;
   ask_why_need: boolean;
   auto_deploy_pages: boolean;
