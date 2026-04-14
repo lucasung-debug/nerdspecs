@@ -4,146 +4,154 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NerdSpecs — MCP Server for Project Documentation</title>
+<meta name="description" content="An MCP server that turns AI-built projects into human-readable documentation. Works with any AI CLI. Zero API keys.">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0a0a;--card:#141414;--border:#222;--accent:#22d3ee;--accent2:#a78bfa;--text:#e5e5e5;--muted:#888;--green:#4ade80;--yellow:#facc15;--pink:#f472b6}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+:root{--bg:#0a0a0a;--surface:#111;--card:#161616;--border:#1e1e1e;--accent:#22d3ee;--accent2:#a78bfa;--text:#f5f5f5;--muted:#888;--green:#34d399;--yellow:#fbbf24;--pink:#f472b6}
+body{font-family:system-ui,-apple-system,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
-nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,10,.9);backdrop-filter:blur(12px);z-index:100}
-.nav-brand{font-weight:800;font-size:1.2rem;display:flex;align-items:center;gap:.5rem}
-.nav-right{display:flex;gap:.75rem;align-items:center}
-.nav-link{padding:.4rem .8rem;border:1px solid var(--border);border-radius:6px;font-size:.85rem;color:var(--text);transition:border-color .2s}
-.nav-link:hover{border-color:var(--accent);text-decoration:none}
-.lang-toggle{cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:.4rem .8rem;background:transparent;color:var(--text);font-size:.85rem;transition:border-color .2s}
-.lang-toggle:hover{border-color:var(--accent)}
-section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
-section h2{font-size:2rem;font-weight:800;text-align:center;margin-bottom:.75rem}
-.section-sub{text-align:center;color:var(--muted);margin-bottom:3rem;font-size:1.05rem}
-#hero{text-align:center;padding:6rem 2rem 4rem;position:relative}
-#hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none}
-.badge{display:inline-block;padding:.3rem .8rem;border:1px solid var(--accent);border-radius:20px;font-size:.8rem;color:var(--accent);margin-bottom:1.5rem;letter-spacing:.5px}
-#hero h1{font-size:3.2rem;font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
-.hero-sub{font-size:1.2rem;color:var(--muted);max-width:55ch;margin:0 auto 2rem}
-.btn-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:8px;font-weight:600;font-size:.95rem;transition:all .2s}
-.btn-primary{background:var(--accent);color:#000}
-.btn-primary:hover{opacity:.85;text-decoration:none}
-.btn-secondary{border:1px solid var(--border);color:var(--text)}
-.btn-secondary:hover{border-color:var(--accent);text-decoration:none}
-.terminal-wrapper{max-width:700px;margin:3rem auto 0}
-.terminal{background:#1a1a2e;border-radius:12px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.5),0 0 40px rgba(34,211,238,.05);border:1px solid #2a2a3e}
-.terminal-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#12122a;border-bottom:1px solid #2a2a3e}
-.terminal-dot{width:12px;height:12px;border-radius:50%}
-.terminal-dot:nth-child(1){background:#ff5f57}
-.terminal-dot:nth-child(2){background:#ffbd2e}
-.terminal-dot:nth-child(3){background:#28c840}
-.terminal-title{margin-left:auto;font-size:.75rem;color:#555}
-.terminal-body{padding:1.25rem;font-family:'Cascadia Code','Fira Code',monospace;font-size:.85rem;line-height:1.8;min-height:220px}
-.terminal-body .prompt{color:var(--green)}
-.terminal-body .cmd{color:#fff}
-.terminal-body .output{color:var(--muted)}
-.terminal-body .highlight{color:var(--accent)}
-.terminal-body .success{color:var(--green)}
-.terminal-body .warn{color:var(--yellow)}
-.terminal-body .dim{color:#555}
-.cursor{display:inline-block;width:8px;height:16px;background:var(--accent);animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.cli-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
-.cli-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;transition:border-color .3s}
-.cli-card:hover{border-color:var(--accent)}
-.cli-card h3{font-size:.9rem;margin-bottom:.3rem}
-.cli-card p{font-size:.75rem;color:var(--muted)}
-.flow-container{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:2rem}
-.flow-step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;width:200px;transition:border-color .3s}
+a:hover{opacity:.85}
+
+/* Scroll animations */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:100;padding:1rem 2rem;background:rgba(10,10,10,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.nav-brand{font-weight:800;font-size:1.15rem;color:var(--text);display:flex;align-items:center;gap:.5rem}
+.nav-right{display:flex;gap:.6rem;align-items:center}
+.nav-link{padding:.35rem .7rem;border:1px solid var(--border);border-radius:8px;font-size:.8rem;color:var(--muted);transition:all .2s}
+.nav-link:hover{border-color:var(--accent);color:var(--text)}
+.lang-btn{cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:.35rem .7rem;background:transparent;color:var(--muted);font-size:.8rem;transition:all .2s}
+.lang-btn:hover{border-color:var(--accent);color:var(--text)}
+
+/* Sections */
+section{padding:clamp(80px,12vw,140px) 2rem;max-width:1200px;margin:0 auto}
+.section-label{text-align:center;text-transform:uppercase;letter-spacing:.15em;font-size:.75rem;color:var(--accent);font-weight:700;margin-bottom:1rem}
+section h2{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;text-align:center;letter-spacing:-.02em;margin-bottom:.5rem}
+.section-sub{text-align:center;color:var(--muted);margin-bottom:clamp(2rem,4vw,4rem);font-size:1.05rem;max-width:50ch;margin-left:auto;margin-right:auto}
+
+/* Hero */
+#hero{text-align:center;padding-top:clamp(100px,15vw,160px);position:relative}
+#hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(34,211,238,.06) 0%,rgba(167,139,250,.03) 40%,transparent 70%);pointer-events:none}
+.badge{display:inline-block;padding:.25rem .75rem;border:1px solid rgba(34,211,238,.3);border-radius:100px;font-size:.75rem;color:var(--accent);margin-bottom:2rem;letter-spacing:.04em}
+#hero h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;background:linear-gradient(135deg,#fff 30%,var(--accent) 70%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.03em;line-height:1.05;margin-bottom:1.5rem}
+.hero-sub{font-size:clamp(1rem,2vw,1.25rem);color:var(--muted);max-width:52ch;margin:0 auto 2.5rem;line-height:1.7}
+.btn-row{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.7rem 1.4rem;border-radius:10px;font-weight:600;font-size:.9rem;transition:all .15s}
+.btn-fill{background:var(--accent);color:#000}
+.btn-fill:hover{background:#06b6d4}
+.btn-ghost{border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--accent)}
+
+/* Terminal */
+.term-wrap{max-width:680px;margin:3.5rem auto 0}
+.term{background:#0d0d1a;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.term-bar{display:flex;align-items:center;gap:7px;padding:14px 18px;background:rgba(255,255,255,.03)}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot:nth-child(1){background:#ff5f57}.dot:nth-child(2){background:#ffbd2e}.dot:nth-child(3){background:#28c840}
+.term-title{margin-left:auto;font-size:.7rem;color:#444;font-family:'SF Mono',monospace}
+.term-body{padding:1.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace;font-size:.8rem;line-height:2;color:var(--muted)}
+.term-body .p{color:var(--green)}.term-body .c{color:#fff}.term-body .d{color:#333}.term-body .h{color:var(--accent)}.term-body .s{color:var(--green)}.term-body .w{color:var(--yellow)}
+.blink{display:inline-block;width:7px;height:15px;background:var(--accent);animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+
+/* CLI Grid */
+.cli-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.cli-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;text-align:center;transition:all .25s}
+.cli-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.cli-card h3{font-size:.95rem;font-weight:700;margin-bottom:.25rem}
+.cli-card p{font-size:.7rem;color:var(--muted);font-family:'SF Mono',monospace}
+
+/* Flow */
+.flow{display:flex;align-items:center;justify-content:center;gap:1.2rem;flex-wrap:wrap}
+.flow-step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem 1.5rem;text-align:center;width:220px;transition:border-color .3s}
 .flow-step:hover{border-color:var(--accent)}
-.flow-icon{font-size:2.5rem;margin-bottom:.75rem}
-.flow-step h3{font-size:.95rem;margin-bottom:.4rem}
-.flow-step p{font-size:.8rem;color:var(--muted)}
-.flow-arrow{font-size:1.5rem;color:var(--muted)}
-.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
-.feature-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:all .3s}
-.feature-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.feature-icon{font-size:1.8rem;margin-bottom:.75rem}
-.feature-card h3{font-size:1rem;margin-bottom:.5rem}
-.feature-card p{font-size:.85rem;color:var(--muted)}
-.tool-table{width:100%;border-collapse:collapse;margin-top:2rem}
-.tool-table th{text-align:left;padding:.75rem 1rem;border-bottom:2px solid var(--border);color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px}
-.tool-table td{padding:.75rem 1rem;border-bottom:1px solid var(--border)}
-.tool-table code{background:#1a1a2e;padding:.2rem .5rem;border-radius:4px;font-size:.85rem;color:var(--accent)}
-.tool-table tr:hover{background:rgba(34,211,238,.03)}
-.install-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;max-width:500px;margin:2rem auto 0;font-family:'Cascadia Code','Fira Code',monospace;font-size:.85rem;line-height:2}
-.install-box .prompt{color:var(--green)}
-.install-box .cmd{color:#fff}
-.install-box .comment{color:#555}
-.nerd-logo{margin-top:3rem;font-family:'Cascadia Code','Fira Code',monospace;color:var(--accent);font-size:.9rem;line-height:1.4}
-footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem}
-@media(max-width:768px){
-#hero h1{font-size:2.2rem}
-.features-grid,.cli-grid{grid-template-columns:1fr}
-.flow-container{flex-direction:column}
-.flow-arrow{transform:rotate(90deg)}
-.terminal-wrapper{margin:2rem 1rem 0}
-}
-@media(max-width:480px){#hero h1{font-size:1.8rem}nav{padding:.75rem 1rem}}
+.flow-icon{font-size:2.8rem;margin-bottom:1rem}
+.flow-step h3{font-size:.9rem;margin-bottom:.3rem}
+.flow-step p{font-size:.75rem;color:var(--muted)}
+.flow-arrow{font-size:1.5rem;color:#333}
+
+/* Tools */
+.tool-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;transition:all .25s}
+.tool-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.tool-card code{color:var(--accent);font-size:.85rem;font-weight:600;font-family:'SF Mono',monospace}
+.tool-card p{font-size:.8rem;color:var(--muted);margin-top:.3rem}
+
+/* Features */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;transition:all .3s}
+.feat-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.feat-icon{font-size:2rem;margin-bottom:.8rem}
+.feat-card h3{font-size:1rem;margin-bottom:.4rem}
+.feat-card p{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* CTA */
+#cta{text-align:center}
+.code-block{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;max-width:520px;margin:2rem auto 0;font-family:'SF Mono','Cascadia Code',monospace;font-size:.82rem;line-height:1.9;text-align:left;color:var(--muted);overflow-x:auto}
+.code-block .k{color:var(--accent)}.code-block .s{color:var(--green)}.code-block .p{color:#666}
+
+/* Nerd Logo */
+.nerd{margin-top:3rem;font-family:'SF Mono',monospace;color:var(--accent);font-size:.85rem;line-height:1.3;opacity:.7}
+
+/* Footer */
+footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:#444;font-size:.75rem}
+footer a{color:var(--muted)}
+
+/* Responsive */
+@media(max-width:900px){.cli-grid,.feat-grid{grid-template-columns:repeat(2,1fr)}.tool-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.cli-grid,.feat-grid{grid-template-columns:1fr}.flow{flex-direction:column}.flow-arrow{transform:rotate(90deg)}nav{padding:.75rem 1rem}.term-wrap{margin:2rem -1rem 0}}
 </style>
 </head>
 <body>
 
 <nav>
-  <div class="nav-brand"><span>🤓</span> NerdSpecs</div>
-  <div class="nav-right">
-    <a href="https://www.npmjs.com/package/nerdspecs" class="nav-link" target="_blank">npm</a>
-    <a href="https://github.com/lucasung-debug/nerdspecs" class="nav-link" target="_blank">GitHub</a>
-    <button class="lang-toggle" onclick="cycleLang()" aria-label="Language toggle">EN / KO</button>
+  <div class="nav-inner">
+    <div class="nav-brand">🤓 NerdSpecs</div>
+    <div class="nav-right">
+      <a href="https://www.npmjs.com/package/nerdspecs" class="nav-link" target="_blank">npm</a>
+      <a href="https://github.com/lucasung-debug/nerdspecs" class="nav-link" target="_blank">GitHub</a>
+      <button class="lang-btn" onclick="cycleLang()">EN</button>
+    </div>
   </div>
 </nav>
 
 <section id="hero">
   <div class="badge">v0.3.0 — MCP Server</div>
   <h1>NerdSpecs</h1>
-  <p class="hero-sub" data-lang="en">An MCP server that turns your AI-built project into docs anyone can understand.<br>Works with any AI CLI. Zero API keys. Zero config.</p>
-  <p class="hero-sub" data-lang="ko">AI로 만든 프로젝트를 누구나 이해할 수 있는 문서로 바꿔주는 MCP 서버.<br>모든 AI CLI에서 작동. API 키 제로. 설정 제로.</p>
-  <p class="hero-sub" data-lang="zh">将 AI 构建的项目转换为人人可读文档的 MCP 服务器。<br>适用于所有 AI CLI。无需 API 密钥。无需配置。</p>
-  <div class="btn-group">
-    <a href="https://www.npmjs.com/package/nerdspecs" class="btn btn-primary" target="_blank">
-      <span data-lang="en">Install Now</span>
-      <span data-lang="ko">지금 설치</span>
-      <span data-lang="zh">立即安装</span>
-    </a>
-    <a href="https://github.com/lucasung-debug/nerdspecs" class="btn btn-secondary" target="_blank">
-      <span data-lang="en">View Source</span>
-      <span data-lang="ko">소스 보기</span>
-      <span data-lang="zh">查看源码</span>
-    </a>
+  <p class="hero-sub" data-lang="en">An MCP server that turns your AI-built project into docs anyone can understand. Zero API keys. Zero config.</p>
+  <p class="hero-sub" data-lang="ko">AI로 만든 프로젝트를 누구나 이해할 수 있는 문서로 바꿔주는 MCP 서버. API 키 불필요. 설정 불필요.</p>
+  <p class="hero-sub" data-lang="zh">将 AI 构建的项目转换为人人可读文档的 MCP 服务器。无需 API 密钥。无需配置。</p>
+  <div class="btn-row">
+    <a href="https://www.npmjs.com/package/nerdspecs" class="btn btn-fill" target="_blank"><span data-lang="en">Install Now</span><span data-lang="ko">지금 설치</span><span data-lang="zh">立即安装</span></a>
+    <a href="https://github.com/lucasung-debug/nerdspecs" class="btn btn-ghost" target="_blank"><span data-lang="en">View Source</span><span data-lang="ko">소스 보기</span><span data-lang="zh">查看源码</span></a>
   </div>
-
-  <div class="terminal-wrapper">
-    <div class="terminal">
-      <div class="terminal-bar">
-        <span class="terminal-dot"></span>
-        <span class="terminal-dot"></span>
-        <span class="terminal-dot"></span>
-        <span class="terminal-title">Claude Code</span>
-      </div>
-      <div class="terminal-body">
-        <span class="prompt">human:</span> <span class="cmd">이 프로젝트 README 만들어줘</span><br><br>
-        <span class="dim">Using MCP tool: analyze_project</span><br>
-        <span class="output">  Language : <span class="highlight">TypeScript</span></span><br>
-        <span class="output">  Framework: <span class="highlight">React + Next.js</span></span><br><br>
-        <span class="dim">Using MCP tool: generate_readme</span><br>
-        <span class="success">✔ README.md generated (142 lines)</span><br><br>
-        <span class="dim">Using MCP tool: generate_landing_page</span><br>
-        <span class="success">✔ docs/index.html ready</span><br><br>
-        <span class="dim">Using MCP tool: auto_commit_and_push</span><br>
-        <span class="success">✔ Pushed to GitHub</span><span class="cursor"></span>
+  <div class="term-wrap">
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">Claude Code</span></div>
+      <div class="term-body">
+<span class="p">human:</span> <span class="c">이 프로젝트 README 만들어줘</span><br><br>
+<span class="d">Using MCP tool: analyze_project</span><br>
+<span class="c">&nbsp; Language : <span class="h">TypeScript</span></span><br>
+<span class="c">&nbsp; Framework: <span class="h">React + Next.js</span></span><br><br>
+<span class="d">Using MCP tool: generate_readme</span><br>
+<span class="s">✔ README.md generated (142 lines)</span><br><br>
+<span class="d">Using MCP tool: generate_landing_page</span><br>
+<span class="s">✔ docs/index.html ready</span><br><br>
+<span class="d">Using MCP tool: auto_commit_and_push</span><br>
+<span class="s">✔ Pushed to GitHub</span><span class="blink"></span>
       </div>
     </div>
   </div>
 </section>
 
-<section>
-  <h2 data-lang="en">Works with Every AI CLI</h2>
+<section class="reveal">
+  <div class="section-label" data-lang="en">Compatibility</div>
+  <div class="section-label" data-lang="ko">호환성</div>
+  <div class="section-label" data-lang="zh">兼容性</div>
+  <h2 data-lang="en">Works with every AI CLI</h2>
   <h2 data-lang="ko">모든 AI CLI에서 작동</h2>
   <h2 data-lang="zh">适用于所有 AI CLI</h2>
   <p class="section-sub" data-lang="en">One MCP server. Nine compatible clients.</p>
@@ -151,108 +159,114 @@ footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:v
   <p class="section-sub" data-lang="zh">一个 MCP 服务器。九个兼容客户端。</p>
   <div class="cli-grid">
     <div class="cli-card"><h3>Claude Code</h3><p>.mcp.json</p></div>
-    <div class="cli-card"><h3>Gemini CLI</h3><p>~/.gemini/settings.json</p></div>
-    <div class="cli-card"><h3>Codex CLI</h3><p>~/.codex/config.toml</p></div>
+    <div class="cli-card"><h3>Gemini CLI</h3><p>settings.json</p></div>
+    <div class="cli-card"><h3>Codex CLI</h3><p>config.toml</p></div>
     <div class="cli-card"><h3>OpenCode</h3><p>opencode.json</p></div>
-    <div class="cli-card"><h3>Qwen Code</h3><p>~/.qwen/settings.json</p></div>
-    <div class="cli-card"><h3>Cursor</h3><p>~/.cursor/mcp.json</p></div>
+    <div class="cli-card"><h3>Qwen Code</h3><p>settings.json</p></div>
+    <div class="cli-card"><h3>Cursor</h3><p>mcp.json</p></div>
     <div class="cli-card"><h3>VS Code</h3><p>.vscode/mcp.json</p></div>
-    <div class="cli-card"><h3>Continue</h3><p>.continue/mcpServers/</p></div>
-    <div class="cli-card"><h3>Cline</h3><p>VS Code globalStorage</p></div>
+    <div class="cli-card"><h3>Continue</h3><p>mcpServers/</p></div>
+    <div class="cli-card"><h3>Cline</h3><p>globalStorage</p></div>
   </div>
 </section>
 
-<section>
-  <h2 data-lang="en">How It Works</h2>
-  <h2 data-lang="ko">작동 방식</h2>
-  <h2 data-lang="zh">工作原理</h2>
-  <p class="section-sub" data-lang="en">Your AI CLI is the brain. NerdSpecs is the hands.</p>
-  <p class="section-sub" data-lang="ko">당신의 AI CLI가 두뇌. NerdSpecs가 손.</p>
-  <p class="section-sub" data-lang="zh">你的 AI CLI 是大脑，NerdSpecs 是双手。</p>
-  <div class="flow-container">
-    <div class="flow-step"><div class="flow-icon">🤖</div><h3 data-lang="en">AI analyzes code</h3><h3 data-lang="ko">AI가 코드 분석</h3><h3 data-lang="zh">AI 分析代码</h3><p>analyze_project</p></div>
+<section class="reveal">
+  <div class="section-label" data-lang="en">How it works</div>
+  <div class="section-label" data-lang="ko">작동 방식</div>
+  <div class="section-label" data-lang="zh">工作原理</div>
+  <h2 data-lang="en">Your AI is the brain. NerdSpecs is the hands.</h2>
+  <h2 data-lang="ko">당신의 AI가 두뇌. NerdSpecs가 손.</h2>
+  <h2 data-lang="zh">你的 AI 是大脑，NerdSpecs 是双手。</h2>
+  <p class="section-sub" data-lang="en">NerdSpecs doesn't call any AI API. Your CLI generates the intelligence.</p>
+  <p class="section-sub" data-lang="ko">NerdSpecs는 AI API를 호출하지 않습니다. CLI가 지능을 제공합니다.</p>
+  <p class="section-sub" data-lang="zh">NerdSpecs 不调用任何 AI API。你的 CLI 提供智能。</p>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-icon">🔍</div><h3 data-lang="en">Analyze code</h3><h3 data-lang="ko">코드 분석</h3><h3 data-lang="zh">分析代码</h3><p>analyze_project</p></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-step"><div class="flow-icon">✍️</div><h3 data-lang="en">AI writes summary</h3><h3 data-lang="ko">AI가 요약 작성</h3><h3 data-lang="zh">AI 撰写摘要</h3><p data-lang="en">Using its own LLM</p><p data-lang="ko">자체 LLM 사용</p><p data-lang="zh">使用自身 LLM</p></div>
+    <div class="flow-step"><div class="flow-icon">✍️</div><h3 data-lang="en">AI writes summary</h3><h3 data-lang="ko">AI가 요약 작성</h3><h3 data-lang="zh">AI 撰写摘要</h3><p data-lang="en">Host LLM</p><p data-lang="ko">호스트 LLM</p><p data-lang="zh">宿主 LLM</p></div>
     <div class="flow-arrow">→</div>
-    <div class="flow-step"><div class="flow-icon">📄</div><h3 data-lang="en">NerdSpecs renders</h3><h3 data-lang="ko">NerdSpecs 렌더링</h3><h3 data-lang="zh">NerdSpecs 渲染</h3><p>README + Landing</p></div>
+    <div class="flow-step"><div class="flow-icon">📄</div><h3 data-lang="en">Render docs</h3><h3 data-lang="ko">문서 렌더링</h3><h3 data-lang="zh">渲染文档</h3><p>README + Landing</p></div>
   </div>
 </section>
 
-<section>
+<section class="reveal">
+  <div class="section-label" data-lang="en">Tools</div>
+  <div class="section-label" data-lang="ko">도구</div>
+  <div class="section-label" data-lang="zh">工具</div>
   <h2 data-lang="en">8 MCP Tools</h2>
   <h2 data-lang="ko">8개 MCP 도구</h2>
   <h2 data-lang="zh">8 个 MCP 工具</h2>
-  <table class="tool-table">
-    <thead><tr><th data-lang="en">Tool</th><th data-lang="ko">도구</th><th data-lang="zh">工具</th><th data-lang="en">Description</th><th data-lang="ko">설명</th><th data-lang="zh">说明</th></tr></thead>
-    <tbody>
-      <tr><td><code>analyze_project</code></td><td data-lang="en">Scan code, detect language &amp; framework</td><td data-lang="ko">코드 스캔, 언어 &amp; 프레임워크 감지</td><td data-lang="zh">扫描代码，检测语言和框架</td></tr>
-      <tr><td><code>generate_readme</code></td><td data-lang="en">Generate README.md (EN/KO/ZH)</td><td data-lang="ko">README.md 생성 (EN/KO/ZH)</td><td data-lang="zh">生成 README.md（EN/KO/ZH）</td></tr>
-      <tr><td><code>generate_landing_page</code></td><td data-lang="en">Dark-themed landing page with terminal demo</td><td data-lang="ko">터미널 데모가 포함된 다크 테마 랜딩 페이지</td><td data-lang="zh">带终端演示的暗色主题着陆页</td></tr>
-      <tr><td><code>fetch_repo_metadata</code></td><td data-lang="en">Fetch GitHub repo info for AI to explain</td><td data-lang="ko">AI가 설명할 GitHub 레포 정보 가져오기</td><td data-lang="zh">获取 GitHub 仓库信息供 AI 解释</td></tr>
-      <tr><td><code>save_decision</code></td><td data-lang="en">Record adopt/skip/watch decisions</td><td data-lang="ko">도입/스킵/관찰 결정 기록</td><td data-lang="zh">记录采用/跳过/观察决策</td></tr>
-      <tr><td><code>get_project_status</code></td><td data-lang="en">Check config and stored motivation</td><td data-lang="ko">설정 및 저장된 동기 확인</td><td data-lang="zh">检查配置和存储的动机</td></tr>
-      <tr><td><code>auto_commit_and_push</code></td><td data-lang="en">Commit + push in one step</td><td data-lang="ko">커밋 + 푸시 한 번에</td><td data-lang="zh">一步完成提交和推送</td></tr>
-      <tr><td><code>suggest_next_steps</code></td><td data-lang="en">Smart suggestions for what to do next</td><td data-lang="ko">다음 단계 스마트 제안</td><td data-lang="zh">智能建议下一步操作</td></tr>
-    </tbody>
-  </table>
-</section>
-
-<section>
-  <h2 data-lang="en">Features</h2>
-  <h2 data-lang="ko">주요 기능</h2>
-  <h2 data-lang="zh">功能特点</h2>
-  <div class="features-grid">
-    <div class="feature-card"><div class="feature-icon">🔌</div><h3 data-lang="en">Universal MCP</h3><h3 data-lang="ko">범용 MCP</h3><h3 data-lang="zh">通用 MCP</h3><p data-lang="en">9 compatible AI CLI clients</p><p data-lang="ko">9개 AI CLI 클라이언트 호환</p><p data-lang="zh">兼容 9 个 AI CLI 客户端</p></div>
-    <div class="feature-card"><div class="feature-icon">🔑</div><h3 data-lang="en">Zero Config</h3><h3 data-lang="ko">설정 제로</h3><h3 data-lang="zh">零配置</h3><p data-lang="en">No API keys needed — your CLI is the LLM</p><p data-lang="ko">API 키 불필요 — CLI가 곧 LLM</p><p data-lang="zh">无需 API 密钥 — CLI 即 LLM</p></div>
-    <div class="feature-card"><div class="feature-icon">🌏</div><h3 data-lang="en">Trilingual</h3><h3 data-lang="ko">3개국어</h3><h3 data-lang="zh">三语言</h3><p data-lang="en">English, Korean, Chinese</p><p data-lang="ko">영어, 한국어, 중국어</p><p data-lang="zh">英语、韩语、中文</p></div>
-    <div class="feature-card"><div class="feature-icon">🖼️</div><h3 data-lang="en">Image Slots</h3><h3 data-lang="ko">이미지 슬롯</h3><h3 data-lang="zh">图片插槽</h3><p data-lang="en">Gemini MCP / Pencil / design tools fill them</p><p data-lang="ko">Gemini MCP / Pencil / 디자인 도구가 채움</p><p data-lang="zh">Gemini MCP / Pencil / 设计工具填充</p></div>
-    <div class="feature-card"><div class="feature-icon">👶</div><h3 data-lang="en">Non-dev Friendly</h3><h3 data-lang="ko">비개발자 친화</h3><h3 data-lang="zh">非开发者友好</h3><p data-lang="en">"Push this for me" → done</p><p data-lang="ko">"올려줘" → 완료</p><p data-lang="zh">"帮我推送" → 完成</p></div>
-    <div class="feature-card"><div class="feature-icon">🧠</div><h3 data-lang="en">Smart Suggest</h3><h3 data-lang="ko">스마트 제안</h3><h3 data-lang="zh">智能建议</h3><p data-lang="en">Tells you what to do next</p><p data-lang="ko">다음에 뭘 할지 알려줌</p><p data-lang="zh">告诉你下一步做什么</p></div>
+  <p class="section-sub" data-lang="en">Everything your AI assistant needs to document your project.</p>
+  <p class="section-sub" data-lang="ko">AI 어시스턴트가 프로젝트를 문서화하는 데 필요한 모든 것.</p>
+  <p class="section-sub" data-lang="zh">AI 助手文档化项目所需的一切。</p>
+  <div class="tool-grid">
+    <div class="tool-card"><code>analyze_project</code><p data-lang="en">Scan code — detect language, framework, dependencies</p><p data-lang="ko">코드 스캔 — 언어, 프레임워크, 의존성 감지</p><p data-lang="zh">扫描代码 — 检测语言、框架、依赖</p></div>
+    <div class="tool-card"><code>generate_readme</code><p data-lang="en">Generate README.md with trilingual support</p><p data-lang="ko">3개국어 지원 README.md 생성</p><p data-lang="zh">生成三语言 README.md</p></div>
+    <div class="tool-card"><code>generate_landing_page</code><p data-lang="en">Dark-themed landing page with terminal demo</p><p data-lang="ko">터미널 데모 포함 다크 테마 랜딩 페이지</p><p data-lang="zh">带终端演示的暗色着陆页</p></div>
+    <div class="tool-card"><code>fetch_repo_metadata</code><p data-lang="en">Fetch GitHub repo info for AI to explain</p><p data-lang="ko">AI 설명용 GitHub 레포 정보 가져오기</p><p data-lang="zh">获取 GitHub 仓库信息</p></div>
+    <div class="tool-card"><code>save_decision</code><p data-lang="en">Record adopt / skip / watch decisions</p><p data-lang="ko">도입 / 스킵 / 관찰 결정 기록</p><p data-lang="zh">记录采用/跳过/观察决策</p></div>
+    <div class="tool-card"><code>get_project_status</code><p data-lang="en">Check config and stored motivation</p><p data-lang="ko">설정 및 저장된 동기 확인</p><p data-lang="zh">检查配置和存储的动机</p></div>
+    <div class="tool-card"><code>auto_commit_and_push</code><p data-lang="en">Commit + push in one step</p><p data-lang="ko">커밋 + 푸시 한 번에</p><p data-lang="zh">一步完成提交和推送</p></div>
+    <div class="tool-card"><code>suggest_next_steps</code><p data-lang="en">Smart suggestions for what to do next</p><p data-lang="ko">다음 단계 스마트 제안</p><p data-lang="zh">智能建议下一步操作</p></div>
   </div>
 </section>
 
-<section id="cta" style="text-align:center">
-  <h2 data-lang="en">Get Started in 10 Seconds</h2>
-  <h2 data-lang="ko">10초 만에 시작하기</h2>
-  <h2 data-lang="zh">10 秒开始使用</h2>
-  <div class="install-box">
-    <span class="comment">// .mcp.json</span><br>
-    <span class="cmd">{</span><br>
-    <span class="cmd">&nbsp;&nbsp;"mcpServers": {</span><br>
-    <span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;"nerdspecs": {</span><br>
-    <span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"command": "<span class="highlight">npx</span>",</span><br>
-    <span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"args": ["<span class="highlight">-y</span>", "<span class="highlight">nerdspecs</span>"]</span><br>
-    <span class="cmd">&nbsp;&nbsp;&nbsp;&nbsp;}</span><br>
-    <span class="cmd">&nbsp;&nbsp;}</span><br>
-    <span class="cmd">}</span>
+<section class="reveal">
+  <div class="section-label" data-lang="en">Features</div>
+  <div class="section-label" data-lang="ko">기능</div>
+  <div class="section-label" data-lang="zh">功能</div>
+  <h2 data-lang="en">Built for everyone</h2>
+  <h2 data-lang="ko">모두를 위해 만들었습니다</h2>
+  <h2 data-lang="zh">为每个人而建</h2>
+  <p class="section-sub" data-lang="en">Developers and non-developers alike.</p>
+  <p class="section-sub" data-lang="ko">개발자와 비개발자 모두.</p>
+  <p class="section-sub" data-lang="zh">开发者和非开发者皆可使用。</p>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-icon">🔌</div><h3 data-lang="en">Universal MCP</h3><h3 data-lang="ko">범용 MCP</h3><h3 data-lang="zh">通用 MCP</h3><p data-lang="en">9 compatible AI CLI clients</p><p data-lang="ko">9개 AI CLI 클라이언트 호환</p><p data-lang="zh">兼容 9 个 AI CLI</p></div>
+    <div class="feat-card"><div class="feat-icon">🔑</div><h3 data-lang="en">Zero Config</h3><h3 data-lang="ko">설정 제로</h3><h3 data-lang="zh">零配置</h3><p data-lang="en">No API keys — your CLI is the LLM</p><p data-lang="ko">API 키 불필요 — CLI가 곧 LLM</p><p data-lang="zh">无需密钥 — CLI 即 LLM</p></div>
+    <div class="feat-card"><div class="feat-icon">🌏</div><h3 data-lang="en">Trilingual</h3><h3 data-lang="ko">3개국어</h3><h3 data-lang="zh">三语言</h3><p data-lang="en">English · Korean · Chinese</p><p data-lang="ko">영어 · 한국어 · 중국어</p><p data-lang="zh">英语 · 韩语 · 中文</p></div>
+    <div class="feat-card"><div class="feat-icon">🖼️</div><h3 data-lang="en">Image Slots</h3><h3 data-lang="ko">이미지 슬롯</h3><h3 data-lang="zh">图片插槽</h3><p data-lang="en">Gemini MCP · Pencil · design tools</p><p data-lang="ko">Gemini MCP · Pencil · 디자인 도구</p><p data-lang="zh">Gemini MCP · Pencil · 设计工具</p></div>
+    <div class="feat-card"><div class="feat-icon">👶</div><h3 data-lang="en">Non-dev Friendly</h3><h3 data-lang="ko">비개발자 친화</h3><h3 data-lang="zh">非开发者友好</h3><p data-lang="en">"Push this for me" → done</p><p data-lang="ko">"올려줘" → 완료</p><p data-lang="zh">"帮我推送" → 完成</p></div>
+    <div class="feat-card"><div class="feat-icon">🧠</div><h3 data-lang="en">Smart Suggest</h3><h3 data-lang="ko">스마트 제안</h3><h3 data-lang="zh">智能建议</h3><p data-lang="en">Tells you what to do next</p><p data-lang="ko">다음에 뭘 할지 알려줌</p><p data-lang="zh">告诉你下一步</p></div>
   </div>
-  <div class="nerd-logo">
-    <pre>   ╭─────╮ ╭─────╮
+</section>
+
+<section id="cta" class="reveal">
+  <div class="section-label" data-lang="en">Get started</div>
+  <div class="section-label" data-lang="ko">시작하기</div>
+  <div class="section-label" data-lang="zh">开始使用</div>
+  <h2 data-lang="en">Add one config. That's it.</h2>
+  <h2 data-lang="ko">설정 하나 추가. 끝.</h2>
+  <h2 data-lang="zh">添加一行配置。就这样。</h2>
+  <div class="code-block"><span class="p">// .mcp.json</span><br><span class="p">{</span><br>&nbsp;&nbsp;<span class="k">"mcpServers"</span><span class="p">: {</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"nerdspecs"</span><span class="p">: {</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"command"</span><span class="p">:</span> <span class="s">"npx"</span><span class="p">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"args"</span><span class="p">:</span> [<span class="s">"-y"</span><span class="p">,</span> <span class="s">"nerdspecs"</span>]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span><br>&nbsp;&nbsp;<span class="p">}</span><br><span class="p">}</span></div>
+  <div class="nerd"><pre>   ╭─────╮ ╭─────╮
    │ ●   │─│   ● │
-   ╰─────╯ ╰─────╯</pre>
-  </div>
+   ╰─────╯ ╰─────╯</pre></div>
 </section>
 
 <footer>
-  <p>MIT License · Built with TypeScript · <a href="https://github.com/lucasung-debug/nerdspecs">GitHub</a> · <a href="https://www.npmjs.com/package/nerdspecs">npm</a></p>
+  <p>MIT License · TypeScript · <a href="https://github.com/lucasung-debug/nerdspecs">GitHub</a> · <a href="https://www.npmjs.com/package/nerdspecs">npm</a></p>
+  <p style="margin-top:.5rem;font-size:.65rem;color:#333">Made with NerdSpecs — Put on nerd glasses and the project becomes visible.</p>
 </footer>
 
 <script>
-var LANGS=['en','ko','zh'];
-function showLang(l){
-  document.querySelectorAll('[data-lang]').forEach(function(el){
-    el.style.display=el.getAttribute('data-lang')===l?'':'none';
-  });
-  var labels={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'};
-  document.querySelector('.lang-toggle').textContent=labels[l]||'EN / KO';
+var L=['en','ko','zh'],i=0;
+function show(l){
+  document.querySelectorAll('[data-lang]').forEach(function(e){e.style.display=e.getAttribute('data-lang')===l?'':'none'});
+  var m={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'};
+  document.querySelector('.lang-btn').textContent=m[l]||'EN';
   localStorage.setItem('nerdspecs-lang',l);
 }
-function cycleLang(){
-  var cur=localStorage.getItem('nerdspecs-lang')||'en';
-  var next=LANGS[(LANGS.indexOf(cur)+1)%LANGS.length];
-  showLang(next);
-}
-showLang(localStorage.getItem('nerdspecs-lang')||'en');
+function cycleLang(){i=(i+1)%L.length;show(L[i])}
+var saved=localStorage.getItem('nerdspecs-lang')||'en';
+i=L.indexOf(saved);if(i<0)i=0;
+show(L[i]);
+
+// Scroll reveal
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
 </script>
 </body>
 </html>
