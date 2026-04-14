@@ -1,5 +1,7 @@
 # NerdSpecs
 
+**[English](README.md)** | **[한국어](README.ko.md)** | **[中文](README.zh.md)**
+
 > Put on nerd glasses and the project becomes visible.
 
 NerdSpecs is an MCP server that turns your AI-built project into human-readable documentation. Works with **any AI CLI** — Claude Code, Gemini CLI, Codex, OpenCode, Qwen Code, Cursor, VS Code, and more.
