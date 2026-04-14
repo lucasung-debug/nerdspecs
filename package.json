@@ -37,6 +37,14 @@
   ],
   "author": "propo",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasung-debug/nerdspecs.git"
+  },
+  "homepage": "https://github.com/lucasung-debug/nerdspecs#readme",
+  "bugs": {
+    "url": "https://github.com/lucasung-debug/nerdspecs/issues"
+  },
   "dependencies": {
     "commander": "^12.1.0",
     "inquirer": "^9.3.0",
