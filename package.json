@@ -4,7 +4,7 @@
   "description": "Put on nerd glasses and the project becomes visible. Translate AI-built projects into human-readable explanations.",
   "type": "module",
   "bin": {
-    "nerdspecs": "./bin/nerdspecs.js"
+    "nerdspecs": "bin/nerdspecs.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
