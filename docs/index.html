@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="lang-en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -138,8 +138,10 @@ section h2{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700;letter-spacing:-.0
 footer{text-align:center;padding:2.5rem;border-top:1px solid var(--border);color:var(--dim);font-size:.7rem}
 footer a{color:var(--sub)}
 
-/* Default: show EN, hide others until JS loads */
-[data-lang="ko"],[data-lang="zh"]{display:none}
+/* Language: hide all, show active */
+.lang-en [data-lang="ko"],.lang-en [data-lang="zh"],
+.lang-ko [data-lang="en"],.lang-ko [data-lang="zh"],
+.lang-zh [data-lang="en"],.lang-zh [data-lang="ko"]{display:none!important}
 
 /* Responsive */
 @media(max-width:768px){
@@ -353,8 +355,8 @@ footer a{color:var(--sub)}
 </footer>
 
 <script>
-var L=['en','ko','zh'],i=0;
-function show(l){document.querySelectorAll('[data-lang]').forEach(function(e){if(e.getAttribute('data-lang')===l){e.style.display=''}else{e.style.display='none'}});document.querySelector('.lang-btn').textContent={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'}[l]||'EN';localStorage.setItem('nerdspecs-lang',l)}
+var L=['en','ko','zh'],i=0,root=document.documentElement;
+function show(l){root.className=root.className.replace(/lang-\w+/,'lang-'+l);document.querySelector('.lang-btn').textContent={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'}[l]||'EN';localStorage.setItem('nerdspecs-lang',l)}
 function cycleLang(){i=(i+1)%L.length;show(L[i])}
 var s=localStorage.getItem('nerdspecs-lang')||'en';i=L.indexOf(s);if(i<0)i=0;show(L[i]);
 var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('v');obs.unobserve(e.target)}})},{threshold:.08,rootMargin:'0px 0px -60px 0px'});
