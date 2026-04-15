@@ -138,6 +138,9 @@ section h2{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700;letter-spacing:-.0
 footer{text-align:center;padding:2.5rem;border-top:1px solid var(--border);color:var(--dim);font-size:.7rem}
 footer a{color:var(--sub)}
 
+/* Default: show EN, hide others until JS loads */
+[data-lang="ko"],[data-lang="zh"]{display:none}
+
 /* Responsive */
 @media(max-width:768px){
   .p-grid,.a-grid,.collapse-inner{grid-template-columns:1fr}
