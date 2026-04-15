@@ -4,386 +4,357 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NerdSpecs — Your AI project, explained for humans</title>
-<meta name="description" content="Turn your AI-built project into documentation anyone can understand. No coding. No setup. Just one sentence.">
+<meta name="description" content="Turn your AI-built project into documentation anyone can understand. Works with any AI CLI.">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#09090b;--surface:#111113;--card:#16161a;--border:#1e1e22;--accent:#22d3ee;--accent2:#a78bfa;--text:#f0f0f0;--sub:#a1a1aa;--muted:#52525b;--green:#34d399}
-body{font-family:system-ui,-apple-system,'SF Pro Display','SF Pro Text',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:var(--accent);text-decoration:none}
+:root{
+  --bg:#060918;
+  --bg2:#0a0e27;
+  --card:rgba(16,20,48,.55);
+  --card-hover:rgba(20,26,60,.7);
+  --border:rgba(255,255,255,.06);
+  --border-hover:rgba(34,211,238,.25);
+  --glow:rgba(34,211,238,.08);
+  --accent:#22d3ee;
+  --accent2:#a78bfa;
+  --pink:#f472b6;
+  --green:#34d399;
+  --text:#f0f0f5;
+  --sub:#8b8fa3;
+  --dim:#4a4e69;
+  --radius:16px;
+}
+body{font-family:system-ui,-apple-system,'SF Pro Display','Segoe UI','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none;transition:opacity .2s}
+a:hover{opacity:.8}
+::selection{background:rgba(34,211,238,.2)}
 
-.reveal{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
-.reveal.visible{opacity:1;transform:none}
+/* Reveal */
+.reveal{opacity:0;transform:translateY(50px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.reveal.v{opacity:1;transform:none}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}
 
-nav{position:sticky;top:0;z-index:100;padding:.85rem 2rem;background:rgba(9,9,11,.75);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.04)}
-.nav-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
-.nav-brand{font-weight:800;font-size:1.1rem;color:var(--text);letter-spacing:-.01em}
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 0;background:rgba(6,9,24,.6);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1140px;margin:0 auto;padding:0 2rem;display:flex;justify-content:space-between;align-items:center}
+.nav-brand{font-weight:800;font-size:1.05rem;color:var(--text);letter-spacing:-.02em}
 .nav-right{display:flex;gap:.5rem;align-items:center}
-.nav-link{padding:.3rem .65rem;border:1px solid var(--border);border-radius:8px;font-size:.78rem;color:var(--sub);transition:all .2s}
-.nav-link:hover{border-color:var(--accent);color:var(--text)}
-.lang-btn{cursor:pointer;border:1px solid var(--border);border-radius:8px;padding:.3rem .65rem;background:transparent;color:var(--sub);font-size:.78rem;transition:all .2s}
-.lang-btn:hover{border-color:var(--accent);color:var(--text)}
+.pill{padding:.35rem .75rem;border:1px solid var(--border);border-radius:100px;font-size:.75rem;color:var(--sub);transition:all .25s;background:transparent;cursor:pointer}
+.pill:hover{border-color:var(--accent);color:var(--text)}
 
-section{padding:clamp(80px,14vw,160px) 2rem;max-width:1000px;margin:0 auto}
-.wide{max-width:1100px}
-.label{text-transform:uppercase;letter-spacing:.15em;font-size:.7rem;color:var(--accent);font-weight:600;margin-bottom:.8rem}
-section h2{font-size:clamp(1.7rem,4vw,2.8rem);font-weight:800;letter-spacing:-.025em;line-height:1.15;margin-bottom:.6rem}
-.sub{color:var(--sub);font-size:clamp(.95rem,1.8vw,1.1rem);line-height:1.7;max-width:54ch}
-.center{text-align:center}.center .sub{margin:0 auto}
+/* Sections */
+section{position:relative;padding:clamp(80px,14vw,160px) 2rem;max-width:960px;margin:0 auto}
+.wide{max-width:1140px}
+.label{text-transform:uppercase;letter-spacing:.2em;font-size:.65rem;color:var(--accent);font-weight:600;margin-bottom:1rem;opacity:.8}
+section h2{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-bottom:.5rem}
+.sub{color:var(--sub);font-size:clamp(.9rem,1.6vw,1.05rem);line-height:1.75;max-width:50ch}
+.center{text-align:center}.center .sub,.center h2{margin-left:auto;margin-right:auto}
 
 /* Hero */
-#hero{text-align:center;padding-top:clamp(100px,16vw,180px);padding-bottom:clamp(60px,10vw,120px);position:relative}
-#hero::before{content:'';position:absolute;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:900px;background:radial-gradient(circle,rgba(34,211,238,.05) 0%,rgba(167,139,250,.02) 40%,transparent 70%);pointer-events:none}
-#hero h1{font-size:clamp(2.2rem,6.5vw,4.2rem);font-weight:900;letter-spacing:-.035em;line-height:1.08;margin-bottom:1.5rem}
-#hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:clamp(1rem,2vw,1.2rem);color:var(--sub);max-width:48ch;margin:0 auto 2.5rem;line-height:1.75}
-.btn-row{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;padding:.65rem 1.3rem;border-radius:10px;font-weight:600;font-size:.88rem;transition:all .15s}
-.btn-fill{background:var(--accent);color:#000}
-.btn-fill:hover{background:#06b6d4}
-.btn-ghost{border:1px solid var(--border);color:var(--text)}
-.btn-ghost:hover{border-color:var(--accent)}
+#hero{text-align:center;padding-top:clamp(140px,20vw,220px);padding-bottom:clamp(80px,12vw,140px);overflow:visible}
+.hero-glow{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(34,211,238,.07) 0%,rgba(167,139,250,.04) 35%,transparent 65%);pointer-events:none;z-index:0}
+.hero-glow2{position:absolute;top:200px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,.06) 0%,transparent 60%);pointer-events:none}
+#hero>*{position:relative;z-index:1}
+#hero h1{font-size:clamp(2rem,6vw,3.8rem);font-weight:800;letter-spacing:-.04em;line-height:1.08;margin-bottom:1.5rem}
+#hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 60%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(.95rem,1.8vw,1.15rem);color:var(--sub);max-width:44ch;margin:0 auto 2.5rem;line-height:1.8}
+.btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;padding:.6rem 1.3rem;border-radius:10px;font-weight:600;font-size:.85rem;transition:all .2s}
+.btn-fill{background:linear-gradient(135deg,var(--accent),#06b6d4);color:#000;box-shadow:0 0 20px rgba(34,211,238,.15)}
+.btn-fill:hover{box-shadow:0 0 30px rgba(34,211,238,.3);opacity:1;transform:translateY(-1px)}
+.btn-ghost{border:1px solid var(--border);color:var(--sub);backdrop-filter:blur(10px)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text);opacity:1}
 
-/* Problem */
-.problem-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:2.5rem}
-.problem-card{border-left:2px solid var(--border);padding:1.5rem;transition:border-color .3s}
-.problem-card:hover{border-color:var(--accent)}
-.problem-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem}
-.problem-card p{font-size:.88rem;color:var(--sub);line-height:1.6}
-
-/* Before After */
-.ba-grid{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:stretch;margin-top:2.5rem;border-radius:16px;overflow:hidden;border:1px solid var(--border)}
-.ba-box{padding:2.5rem;background:var(--card)}
-.ba-box h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.2rem}
-.ba-box ul{list-style:none;display:flex;flex-direction:column;gap:.7rem}
-.ba-box li{font-size:.9rem;color:var(--sub);padding-left:1.2rem;position:relative}
-.ba-box li::before{content:'';position:absolute;left:0;top:.55rem;width:6px;height:6px;border-radius:50%;background:var(--muted)}
-.ba-box.after li::before{background:var(--green)}
-.ba-box.after li{color:var(--text)}
-.ba-arrow{display:flex;align-items:center;justify-content:center;background:var(--surface);color:var(--accent);font-size:1.2rem;font-weight:200}
-
-/* Steps */
-.steps{display:flex;flex-direction:column;gap:3rem;margin-top:3rem;counter-reset:step}
-.step{display:grid;grid-template-columns:48px 1fr;gap:1.5rem;align-items:start}
-.step-num{width:48px;height:48px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--accent);flex-shrink:0}
-.step h3{font-size:1.05rem;font-weight:700;margin-bottom:.3rem}
-.step p{font-size:.9rem;color:var(--sub);line-height:1.6}
-
-/* Audience */
-.audience-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.5rem}
-.audience-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;transition:all .3s}
-.audience-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.audience-card h3{font-size:1rem;font-weight:700;margin-bottom:.5rem}
-.audience-card p{font-size:.88rem;color:var(--sub);line-height:1.6}
+/* Glass cards */
+.glass{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius);transition:all .35s cubic-bezier(.23,1,.32,1)}
+.glass:hover{background:var(--card-hover);border-color:var(--border-hover);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3),0 0 0 1px rgba(34,211,238,.06)}
 
 /* Terminal */
-.term{background:#0c0c18;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.05);margin-top:2.5rem;max-width:680px}
-.term-bar{display:flex;align-items:center;gap:7px;padding:14px 18px;background:rgba(255,255,255,.025)}
-.dot{width:11px;height:11px;border-radius:50%}
+.term-wrap{max-width:640px;margin:3.5rem auto 0}
+.term{background:rgba(10,14,39,.9);border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 40px 100px rgba(0,0,0,.5),0 0 60px rgba(34,211,238,.03)}
+.term-bar{display:flex;align-items:center;gap:7px;padding:14px 18px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%}
 .dot:nth-child(1){background:#ff5f57}.dot:nth-child(2){background:#ffbd2e}.dot:nth-child(3){background:#28c840}
-.term-title{margin-left:auto;font-size:.68rem;color:#333;font-family:'SF Mono',monospace}
-.term-body{padding:1.5rem;font-family:'SF Mono','Cascadia Code','Fira Code',monospace;font-size:.78rem;line-height:2;color:var(--sub)}
-.t-g{color:var(--green)}.t-w{color:#fff}.t-d{color:#2a2a2a}.t-h{color:var(--accent)}.t-y{color:#fbbf24}
-.blink{display:inline-block;width:7px;height:14px;background:var(--accent);animation:bl 1s step-end infinite;vertical-align:middle;margin-left:2px}
+.term-t{margin-left:auto;font-size:.65rem;color:var(--dim);font-family:'SF Mono',ui-monospace,monospace}
+.term-body{padding:1.4rem 1.6rem;font-family:'SF Mono','Cascadia Code','Fira Code',ui-monospace,monospace;font-size:.76rem;line-height:2.1;color:var(--sub)}
+.tg{color:var(--green)}.tw{color:var(--text)}.td{color:var(--dim)}.th{color:var(--accent)}.ty{color:#fbbf24}
+.blink{display:inline-block;width:7px;height:14px;background:var(--accent);animation:bl 1.2s step-end infinite;vertical-align:middle;margin-left:2px}
 @keyframes bl{50%{opacity:0}}
 
-/* Tech details */
-.detail-toggle{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.5rem;color:var(--text);font-size:.95rem;font-weight:600;cursor:pointer;transition:border-color .2s;margin-top:2.5rem}
-.detail-toggle:hover{border-color:var(--accent)}
-.detail-toggle::after{content:'+';float:right;color:var(--muted)}
-.detail-toggle.open::after{content:'−'}
-.detail-content{max-height:0;overflow:hidden;transition:max-height .4s ease}
-.detail-content.open{max-height:2000px}
-.detail-inner{padding:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;transition:border-color .2s}
-.tool-card:hover{border-color:var(--accent)}
-.tool-card code{color:var(--accent);font-size:.82rem;font-weight:600;font-family:'SF Mono',monospace}
-.tool-card p{font-size:.78rem;color:var(--sub);margin-top:.25rem}
+/* Problem cards */
+.p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.p-card{padding:2rem;position:relative;overflow:hidden}
+.p-card::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,var(--accent),transparent);opacity:.4;transition:opacity .3s}
+.p-card:hover::before{opacity:1}
+.p-card h3{font-size:.95rem;font-weight:700;margin-bottom:.6rem;line-height:1.3}
+.p-card p{font-size:.85rem;color:var(--sub);line-height:1.65}
 
-/* CLI compat */
-.cli-list{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
-.cli-tag{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.35rem .7rem;font-size:.75rem;color:var(--sub)}
+/* Before/After */
+.ba{display:grid;grid-template-columns:1fr 48px 1fr;gap:0;margin-top:2.5rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.ba-side{padding:2.5rem;background:var(--card)}
+.ba-side h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);margin-bottom:1.5rem;font-weight:600}
+.ba-side ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.ba-side li{font-size:.88rem;color:var(--sub);padding-left:1.4rem;position:relative;line-height:1.5}
+.ba-side li::before{content:'';position:absolute;left:0;top:.5rem;width:5px;height:5px;border-radius:50%;background:var(--dim)}
+.ba-side.after li{color:var(--text)}
+.ba-side.after li::before{background:var(--green);box-shadow:0 0 6px rgba(52,211,153,.4)}
+.ba-mid{display:flex;align-items:center;justify-content:center;background:rgba(10,14,39,.8);color:var(--dim);font-size:1rem}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:3rem;margin-top:3rem}
+.step{display:grid;grid-template-columns:52px 1fr;gap:1.5rem}
+.step-n{width:52px;height:52px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:var(--accent);background:var(--card);backdrop-filter:blur(10px);flex-shrink:0}
+.step h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}
+.step p{font-size:.88rem;color:var(--sub);line-height:1.7}
+
+/* Audience */
+.a-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:2.5rem}
+.a-card{padding:2rem}
+.a-card h3{font-size:.95rem;font-weight:700;margin-bottom:.5rem}
+.a-card p{font-size:.85rem;color:var(--sub);line-height:1.65}
+
+/* Tech collapsible */
+.toggle{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.5rem;color:var(--text);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .25s;backdrop-filter:blur(10px);margin-top:1rem}
+.toggle:hover{border-color:var(--border-hover)}
+.toggle::after{content:'+';float:right;color:var(--dim);font-weight:400}
+.toggle.open::after{content:'\2212'}
+.collapse{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.23,1,.32,1)}
+.collapse.open{max-height:2000px}
+.collapse-inner{padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.t-card{background:rgba(10,14,39,.5);border:1px solid var(--border);border-radius:10px;padding:1rem;transition:border-color .2s}
+.t-card:hover{border-color:var(--border-hover)}
+.t-card code{color:var(--accent);font-size:.8rem;font-weight:600;font-family:'SF Mono',ui-monospace,monospace}
+.t-card p{font-size:.75rem;color:var(--sub);margin-top:.2rem}
+.cli-wrap{padding:1.2rem;display:flex;flex-wrap:wrap;gap:.4rem}
+.cli-tag{background:rgba(10,14,39,.5);border:1px solid var(--border);border-radius:8px;padding:.3rem .65rem;font-size:.72rem;color:var(--sub);transition:all .2s}
+.cli-tag:hover{border-color:var(--accent);color:var(--text)}
 
 /* CTA */
 #cta{text-align:center}
-.code-block{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;max-width:480px;margin:2rem auto 0;font-family:'SF Mono','Cascadia Code',monospace;font-size:.8rem;line-height:1.9;text-align:left;color:var(--sub);overflow-x:auto}
-.code-block .k{color:var(--accent)}.code-block .s{color:var(--green)}.code-block .p{color:#444}
-.nerd{margin-top:3rem;font-family:'SF Mono',monospace;color:var(--accent);font-size:.82rem;line-height:1.3;opacity:.6}
+.code-box{background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius);padding:1.8rem 2rem;max-width:460px;margin:2rem auto 0;font-family:'SF Mono','Cascadia Code',ui-monospace,monospace;font-size:.78rem;line-height:2;text-align:left;color:var(--sub)}
+.code-box .k{color:var(--accent)}.code-box .s{color:var(--green)}.code-box .p{color:var(--dim)}
+.nerd{margin-top:3.5rem;font-family:'SF Mono',ui-monospace,monospace;color:var(--accent);font-size:.8rem;line-height:1.3;opacity:.5}
 
-footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:#333;font-size:.72rem}
-footer a{color:var(--muted)}
+footer{text-align:center;padding:2.5rem;border-top:1px solid var(--border);color:var(--dim);font-size:.7rem}
+footer a{color:var(--sub)}
 
-@media(max-width:768px){.problem-grid,.audience-grid,.detail-inner{grid-template-columns:1fr}.ba-grid{grid-template-columns:1fr;}.ba-arrow{padding:.5rem;transform:rotate(90deg)}}
-@media(max-width:600px){nav{padding:.7rem 1rem}}
+/* Responsive */
+@media(max-width:768px){
+  .p-grid,.a-grid,.collapse-inner{grid-template-columns:1fr}
+  .ba{grid-template-columns:1fr}.ba-mid{padding:.6rem;transform:rotate(90deg)}
+}
+@media(max-width:600px){nav .nav-inner{padding:0 1rem}}
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <div class="nav-brand">NerdSpecs</div>
-    <div class="nav-right">
-      <a href="https://www.npmjs.com/package/nerdspecs" class="nav-link" target="_blank">npm</a>
-      <a href="https://github.com/lucasung-debug/nerdspecs" class="nav-link" target="_blank">GitHub</a>
-      <button class="lang-btn" onclick="cycleLang()">EN</button>
-    </div>
+<nav><div class="nav-inner">
+  <div class="nav-brand">NerdSpecs</div>
+  <div class="nav-right">
+    <a href="https://www.npmjs.com/package/nerdspecs" class="pill" target="_blank">npm</a>
+    <a href="https://github.com/lucasung-debug/nerdspecs" class="pill" target="_blank">GitHub</a>
+    <button class="pill" onclick="cycleLang()">EN</button>
   </div>
-</nav>
+</div></nav>
 
-<!-- ━━━ HERO ━━━ -->
 <section id="hero">
-  <h1 data-lang="en">You built something amazing.<br>Now <em>explain it</em>.</h1>
-  <h1 data-lang="ko">대단한 걸 만들었습니다.<br>이제 <em>설명할 차례</em>입니다.</h1>
-  <h1 data-lang="zh">你做了一个了不起的东西。<br>现在，<em>让别人也能看懂</em>。</h1>
-  <p class="hero-sub" data-lang="en">You used AI to build a project. But when someone asks "what does it do?" — you freeze. NerdSpecs writes the explanation for you.</p>
-  <p class="hero-sub" data-lang="ko">AI로 프로젝트를 만들었습니다. 그런데 누가 "이게 뭐야?"라고 물으면 — 막막합니다. NerdSpecs가 대신 설명해줍니다.</p>
-  <p class="hero-sub" data-lang="zh">你用 AI 做了一个项目。但当别人问"这是什么？"的时候，你却说不出来。NerdSpecs 帮你写好说明。</p>
-  <div class="btn-row">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <h1 class="reveal" data-lang="en">You built something<br>amazing with AI.<br>Now <em>explain it</em>.</h1>
+  <h1 class="reveal" data-lang="ko">AI로 대단한 걸<br>만들었습니다.<br>이제 <em>설명할 차례</em>.</h1>
+  <h1 class="reveal" data-lang="zh">你用 AI 做了<br>了不起的东西。<br>现在，<em>让别人看懂</em>。</h1>
+  <p class="hero-sub reveal d1" data-lang="en">NerdSpecs turns your project into documentation that anyone can understand. One sentence from you — complete README and landing page from us.</p>
+  <p class="hero-sub reveal d1" data-lang="ko">NerdSpecs가 프로젝트를 누구나 이해할 수 있는 문서로 바꿔줍니다. 당신의 한 문장 — 완전한 README와 랜딩 페이지.</p>
+  <p class="hero-sub reveal d1" data-lang="zh">NerdSpecs 将你的项目变成任何人都能理解的文档。你说一句话 — 完整的 README 和着陆页。</p>
+  <div class="btn-row reveal d2">
     <a href="https://www.npmjs.com/package/nerdspecs" class="btn btn-fill" target="_blank"><span data-lang="en">Get Started Free</span><span data-lang="ko">무료로 시작</span><span data-lang="zh">免费开始</span></a>
-    <a href="https://github.com/lucasung-debug/nerdspecs" class="btn btn-ghost" target="_blank"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub에서 보기</span><span data-lang="zh">在 GitHub 查看</span></a>
+    <a href="https://github.com/lucasung-debug/nerdspecs" class="btn btn-ghost" target="_blank"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub 보기</span><span data-lang="zh">GitHub 查看</span></a>
   </div>
-</section>
-
-<!-- ━━━ PROBLEM ━━━ -->
-<section class="reveal">
-  <div class="label" data-lang="en">The problem</div>
-  <div class="label" data-lang="ko">문제</div>
-  <div class="label" data-lang="zh">问题</div>
-  <h2 data-lang="en">Sound familiar?</h2>
-  <h2 data-lang="ko">이런 경험 있으시죠?</h2>
-  <h2 data-lang="zh">是不是很熟悉？</h2>
-  <div class="problem-grid">
-    <div class="problem-card">
-      <h3 data-lang="en">"What does your project do?"</h3>
-      <h3 data-lang="ko">"네 프로젝트가 뭐 하는 건데?"</h3>
-      <h3 data-lang="zh">"你的项目是做什么的？"</h3>
-      <p data-lang="en">You built it with AI. You know it works. But you can't explain it in a way that non-technical people understand.</p>
-      <p data-lang="ko">AI로 만들었고 잘 돌아갑니다. 하지만 비전공자에게 설명하려면 말문이 막힙니다.</p>
-      <p data-lang="zh">你用 AI 做的，能运行。但你没法让非技术人员理解它。</p>
-    </div>
-    <div class="problem-card">
-      <h3 data-lang="en">Empty README syndrome</h3>
-      <h3 data-lang="ko">빈 README 증후군</h3>
-      <h3 data-lang="zh">空 README 综合症</h3>
-      <p data-lang="en">Your GitHub repo has a README.md that's either empty or full of code nobody reads. Your project looks abandoned.</p>
-      <p data-lang="ko">GitHub 레포에 README가 비어있거나 아무도 안 읽는 코드뿐입니다. 프로젝트가 버려진 것처럼 보입니다.</p>
-      <p data-lang="zh">你的 GitHub 仓库里 README 要么是空的，要么全是没人看的代码。项目看起来像被遗弃了。</p>
-    </div>
-    <div class="problem-card">
-      <h3 data-lang="en">Writing docs takes hours</h3>
-      <h3 data-lang="ko">문서 작성에 몇 시간씩</h3>
-      <h3 data-lang="zh">写文档要花好几个小时</h3>
-      <p data-lang="en">You'd rather keep coding than spend an afternoon writing documentation that gets outdated in a week.</p>
-      <p data-lang="ko">일주일이면 구식이 될 문서 쓰느라 오후를 날리기보다 코딩을 더 하고 싶습니다.</p>
-      <p data-lang="zh">你宁可继续写代码，也不想花一下午写一周后就过时的文档。</p>
+  <div class="term-wrap reveal d3">
+    <div class="term">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-t">Claude Code</span></div>
+      <div class="term-body">
+<span class="tg">human:</span> <span class="tw">이 프로젝트 README 만들어줘</span><br><br>
+<span class="td">Using tool: analyze_project</span><br>
+<span class="tw">&nbsp; Language : <span class="th">TypeScript</span> &middot; Framework: <span class="th">Next.js</span></span><br><br>
+<span class="td">Using tool: generate_readme</span><br>
+<span class="tg">&#10004; README.md generated</span> <span class="td">(142 lines)</span><br><br>
+<span class="td">Using tool: generate_landing_page</span><br>
+<span class="tg">&#10004; Landing page ready</span><br><br>
+<span class="td">Using tool: auto_commit_and_push</span><br>
+<span class="tg">&#10004; Pushed to GitHub</span><span class="blink"></span>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ━━━ BEFORE / AFTER ━━━ -->
 <section class="reveal">
-  <div class="label" data-lang="en">The difference</div>
-  <div class="label" data-lang="ko">차이</div>
-  <div class="label" data-lang="zh">区别</div>
-  <h2 data-lang="en">Before and after NerdSpecs</h2>
-  <h2 data-lang="ko">NerdSpecs 전과 후</h2>
-  <h2 data-lang="zh">使用 NerdSpecs 前后</h2>
-  <p class="sub" data-lang="en">One sentence from you. Complete documentation from NerdSpecs.</p>
-  <p class="sub" data-lang="ko">당신의 한 문장. NerdSpecs의 완전한 문서화.</p>
-  <p class="sub" data-lang="zh">你说一句话。NerdSpecs 给你完整文档。</p>
-  <div class="ba-grid">
-    <div class="ba-box">
+  <div class="label" data-lang="en">The problem</div><div class="label" data-lang="ko">문제</div><div class="label" data-lang="zh">问题</div>
+  <h2 data-lang="en">Sound familiar?</h2><h2 data-lang="ko">이런 경험 있으시죠?</h2><h2 data-lang="zh">是不是很熟悉？</h2>
+  <div class="p-grid">
+    <div class="p-card glass reveal d1">
+      <h3 data-lang="en">"What does it do?"</h3><h3 data-lang="ko">"이게 뭐 하는 건데?"</h3><h3 data-lang="zh">"这是做什么的？"</h3>
+      <p data-lang="en">You built it. It works. But when someone asks, you can't explain it simply.</p>
+      <p data-lang="ko">만들었고, 잘 됩니다. 하지만 누가 물으면 쉽게 설명이 안 됩니다.</p>
+      <p data-lang="zh">你做的，能用。但别人问起来，你说不清楚。</p>
+    </div>
+    <div class="p-card glass reveal d2">
+      <h3 data-lang="en">Empty README</h3><h3 data-lang="ko">빈 README</h3><h3 data-lang="zh">空白 README</h3>
+      <p data-lang="en">Your repo looks abandoned. No description, no landing page, no first impression.</p>
+      <p data-lang="ko">레포가 버려진 것처럼 보입니다. 설명도, 랜딩 페이지도, 첫인상도 없습니다.</p>
+      <p data-lang="zh">你的仓库看起来像被遗弃了。没描述，没着陆页，没第一印象。</p>
+    </div>
+    <div class="p-card glass reveal d3">
+      <h3 data-lang="en">Docs take hours</h3><h3 data-lang="ko">문서 작성에 몇 시간</h3><h3 data-lang="zh">写文档要花几小时</h3>
+      <p data-lang="en">You'd rather build than write. Documentation gets outdated before it's even done.</p>
+      <p data-lang="ko">쓰는 것보다 만드는 게 좋습니다. 문서는 다 쓰기도 전에 구식이 됩니다.</p>
+      <p data-lang="zh">你宁可去做项目。文档还没写完就过时了。</p>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="label" data-lang="en">The result</div><div class="label" data-lang="ko">결과</div><div class="label" data-lang="zh">效果</div>
+  <h2 data-lang="en">One sentence from you.<br>Complete docs from NerdSpecs.</h2>
+  <h2 data-lang="ko">당신의 한 문장.<br>NerdSpecs의 완전한 문서.</h2>
+  <h2 data-lang="zh">你说一句话。<br>NerdSpecs 给你完整文档。</h2>
+  <div class="ba">
+    <div class="ba-side">
       <h3 data-lang="en">Before</h3><h3 data-lang="ko">이전</h3><h3 data-lang="zh">之前</h3>
       <ul>
-        <li data-lang="en">Empty or cryptic README.md</li><li data-lang="ko">비어있거나 암호 같은 README.md</li><li data-lang="zh">空白或晦涩的 README.md</li>
-        <li data-lang="en">No project landing page</li><li data-lang="ko">프로젝트 랜딩 페이지 없음</li><li data-lang="zh">没有项目着陆页</li>
-        <li data-lang="en">Can't explain what it does</li><li data-lang="ko">뭘 하는 건지 설명 불가</li><li data-lang="zh">无法解释它做了什么</li>
-        <li data-lang="en">Looks like an abandoned repo</li><li data-lang="ko">버려진 레포처럼 보임</li><li data-lang="zh">看起来像废弃仓库</li>
+        <li data-lang="en">Empty or cryptic README</li><li data-lang="ko">비어있거나 암호 같은 README</li><li data-lang="zh">空白或晦涩的 README</li>
+        <li data-lang="en">No landing page</li><li data-lang="ko">랜딩 페이지 없음</li><li data-lang="zh">没有着陆页</li>
+        <li data-lang="en">Can't explain the project</li><li data-lang="ko">프로젝트 설명 불가</li><li data-lang="zh">无法解释项目</li>
+        <li data-lang="en">Looks abandoned</li><li data-lang="ko">버려진 것처럼 보임</li><li data-lang="zh">看起来像废弃的</li>
       </ul>
     </div>
-    <div class="ba-arrow">→</div>
-    <div class="ba-box after">
+    <div class="ba-mid">→</div>
+    <div class="ba-side after">
       <h3 data-lang="en">After</h3><h3 data-lang="ko">이후</h3><h3 data-lang="zh">之后</h3>
       <ul>
-        <li data-lang="en">Clear README anyone can understand</li><li data-lang="ko">누구나 이해하는 깔끔한 README</li><li data-lang="zh">任何人都能理解的清晰 README</li>
-        <li data-lang="en">Professional landing page, auto-deployed</li><li data-lang="ko">프로페셔널 랜딩 페이지, 자동 배포</li><li data-lang="zh">专业着陆页，自动部署</li>
-        <li data-lang="en">Bilingual docs (EN/KO/ZH)</li><li data-lang="ko">다국어 문서 (EN/KO/ZH)</li><li data-lang="zh">多语言文档（EN/KO/ZH）</li>
-        <li data-lang="en">Git push with one command</li><li data-lang="ko">"올려줘" 한마디로 Git push</li><li data-lang="zh">一句话完成 Git push</li>
+        <li data-lang="en">Clear README anyone understands</li><li data-lang="ko">누구나 이해하는 깔끔한 README</li><li data-lang="zh">人人能懂的清晰 README</li>
+        <li data-lang="en">Professional landing page</li><li data-lang="ko">프로페셔널 랜딩 페이지</li><li data-lang="zh">专业着陆页</li>
+        <li data-lang="en">Trilingual docs (EN/KO/ZH)</li><li data-lang="ko">3개국어 문서</li><li data-lang="zh">三语言文档</li>
+        <li data-lang="en">Auto-pushed to GitHub</li><li data-lang="ko">"올려줘" 한마디로 완료</li><li data-lang="zh">自动推送到 GitHub</li>
       </ul>
     </div>
   </div>
 </section>
 
-<!-- ━━━ HOW ━━━ -->
 <section class="reveal">
-  <div class="label" data-lang="en">How it works</div>
-  <div class="label" data-lang="ko">작동 방식</div>
-  <div class="label" data-lang="zh">如何运作</div>
-  <h2 data-lang="en">Three steps. That's it.</h2>
-  <h2 data-lang="ko">세 단계. 그게 끝.</h2>
-  <h2 data-lang="zh">三步搞定。</h2>
+  <div class="label" data-lang="en">How it works</div><div class="label" data-lang="ko">작동 방식</div><div class="label" data-lang="zh">如何运作</div>
+  <h2 data-lang="en">Three steps. Done.</h2><h2 data-lang="ko">세 단계. 끝.</h2><h2 data-lang="zh">三步搞定。</h2>
   <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
+    <div class="step reveal d1">
+      <div class="step-n">1</div>
       <div>
-        <h3 data-lang="en">Add NerdSpecs to your AI tool</h3>
-        <h3 data-lang="ko">AI 도구에 NerdSpecs 추가</h3>
-        <h3 data-lang="zh">将 NerdSpecs 添加到你的 AI 工具</h3>
-        <p data-lang="en">Copy one JSON snippet into your config file. Works with Claude Code, Gemini CLI, Codex, Cursor, VS Code, and more.</p>
-        <p data-lang="ko">설정 파일에 JSON 한 줄 복사. Claude Code, Gemini CLI, Codex, Cursor, VS Code 등 모두 지원.</p>
-        <p data-lang="zh">将一段 JSON 复制到配置文件。支持 Claude Code、Gemini CLI、Codex、Cursor、VS Code 等。</p>
+        <h3 data-lang="en">Add NerdSpecs to your AI tool</h3><h3 data-lang="ko">AI 도구에 NerdSpecs 추가</h3><h3 data-lang="zh">添加到你的 AI 工具</h3>
+        <p data-lang="en">Copy one JSON snippet into your config. Works with Claude Code, Gemini CLI, Codex, Cursor, VS Code — any MCP-compatible tool.</p>
+        <p data-lang="ko">설정 파일에 JSON 한 줄 복사. Claude Code, Gemini CLI, Codex, Cursor, VS Code 등 모든 MCP 호환 도구.</p>
+        <p data-lang="zh">将一段 JSON 复制到配置文件。支持 Claude Code、Gemini CLI、Codex、Cursor、VS Code 等所有 MCP 兼容工具。</p>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
+    <div class="step reveal d2">
+      <div class="step-n">2</div>
       <div>
-        <h3 data-lang="en">Tell your AI what you want</h3>
-        <h3 data-lang="ko">AI에게 원하는 걸 말하기</h3>
-        <h3 data-lang="zh">告诉你的 AI 你想要什么</h3>
-        <p data-lang="en">"Make a README for this project." Your AI analyzes the code, writes a summary, and NerdSpecs turns it into beautiful docs.</p>
-        <p data-lang="ko">"이 프로젝트 README 만들어줘." AI가 코드를 분석하고, 요약을 쓰고, NerdSpecs가 예쁜 문서로 만듭니다.</p>
-        <p data-lang="zh">"给这个项目写个 README。" AI 分析代码、写摘要，NerdSpecs 生成精美文档。</p>
+        <h3 data-lang="en">Ask in plain language</h3><h3 data-lang="ko">자연어로 요청</h3><h3 data-lang="zh">用自然语言说</h3>
+        <p data-lang="en">"Make a README for this project." Your AI reads the code, writes the summary, NerdSpecs renders it into beautiful documentation.</p>
+        <p data-lang="ko">"이 프로젝트 README 만들어줘." AI가 코드를 읽고 요약을 쓰고, NerdSpecs가 예쁜 문서로 만듭니다.</p>
+        <p data-lang="zh">"给这个项目写个 README。" AI 读代码、写摘要，NerdSpecs 渲染成精美文档。</p>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">3</div>
+    <div class="step reveal d3">
+      <div class="step-n">3</div>
       <div>
-        <h3 data-lang="en">Done. Published. Shared.</h3>
-        <h3 data-lang="ko">끝. 배포됨. 공유됨.</h3>
-        <h3 data-lang="zh">完成。已发布。已分享。</h3>
-        <p data-lang="en">README + landing page generated, committed, and pushed to GitHub. Say "push this for me" and it's live.</p>
-        <p data-lang="ko">README + 랜딩 페이지 생성, 커밋, GitHub에 푸시까지. "올려줘" 한마디면 끝.</p>
-        <p data-lang="zh">README + 着陆页生成、提交、推送到 GitHub。说一句"帮我推送"就上线了。</p>
+        <h3 data-lang="en">Done. Live. Shared.</h3><h3 data-lang="ko">끝. 배포됨. 공유됨.</h3><h3 data-lang="zh">完成。上线。分享。</h3>
+        <p data-lang="en">README + landing page generated and pushed to GitHub. Just say "push this for me."</p>
+        <p data-lang="ko">README + 랜딩 페이지 생성 후 GitHub에 푸시. "올려줘" 한마디면 끝.</p>
+        <p data-lang="zh">生成 README + 着陆页并推送到 GitHub。说一句"帮我推送"就行。</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ━━━ DEMO ━━━ -->
-<section class="reveal center">
-  <div class="label" data-lang="en">In action</div>
-  <div class="label" data-lang="ko">실제 화면</div>
-  <div class="label" data-lang="zh">实际效果</div>
-  <h2 data-lang="en">What it actually looks like</h2>
-  <h2 data-lang="ko">실제로 이렇게 보입니다</h2>
-  <h2 data-lang="zh">实际效果如下</h2>
-  <div class="term" style="margin:2.5rem auto 0">
-    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">Claude Code</span></div>
-    <div class="term-body">
-<span class="t-g">human:</span> <span class="t-w">이 프로젝트 README 만들어줘</span><br><br>
-<span class="t-d">Using tool: analyze_project</span><br>
-<span class="t-w">&nbsp; Language : <span class="t-h">TypeScript</span></span><br>
-<span class="t-w">&nbsp; Framework: <span class="t-h">React + Next.js</span></span><br><br>
-<span class="t-d">Using tool: generate_readme</span><br>
-<span class="t-g">&#10004; README.md generated (142 lines)</span><br><br>
-<span class="t-d">Using tool: generate_landing_page</span><br>
-<span class="t-g">&#10004; docs/index.html ready</span><br><br>
-<span class="t-d">Using tool: auto_commit_and_push</span><br>
-<span class="t-g">&#10004; Pushed to GitHub</span><span class="blink"></span>
-    </div>
-  </div>
-</section>
-
-<!-- ━━━ WHO ━━━ -->
 <section class="reveal">
-  <div class="label" data-lang="en">Who is it for</div>
-  <div class="label" data-lang="ko">누구를 위한 건가요</div>
-  <div class="label" data-lang="zh">适合谁</div>
-  <h2 data-lang="en">Built for makers, not just developers</h2>
-  <h2 data-lang="ko">개발자뿐 아니라 만드는 사람 모두를 위해</h2>
-  <h2 data-lang="zh">为所有创造者打造，不只是开发者</h2>
-  <div class="audience-grid">
-    <div class="audience-card">
+  <div class="label" data-lang="en">Who is it for</div><div class="label" data-lang="ko">대상</div><div class="label" data-lang="zh">适合谁</div>
+  <h2 data-lang="en">For makers, not just developers</h2><h2 data-lang="ko">개발자뿐 아니라 만드는 모든 사람</h2><h2 data-lang="zh">为创造者，不只是开发者</h2>
+  <div class="a-grid">
+    <div class="a-card glass reveal d1">
       <h3 data-lang="en">Vibe coders</h3><h3 data-lang="ko">바이브 코더</h3><h3 data-lang="zh">氛围编程者</h3>
-      <p data-lang="en">You build with AI tools but struggle with documentation. NerdSpecs does the explaining while you focus on creating.</p>
-      <p data-lang="ko">AI 도구로 만들지만 문서화가 어렵습니다. 당신은 만들고, NerdSpecs가 설명합니다.</p>
-      <p data-lang="zh">你用 AI 工具构建，但文档让你头疼。你专注创造，NerdSpecs 负责解释。</p>
+      <p data-lang="en">You create with AI but struggle to document. Focus on building — NerdSpecs handles the rest.</p>
+      <p data-lang="ko">AI로 만들지만 문서화가 어렵습니다. 만드는 데 집중 — 나머지는 NerdSpecs가.</p>
+      <p data-lang="zh">你用 AI 创造，但文档让你头疼。专注构建 — 其余交给 NerdSpecs。</p>
     </div>
-    <div class="audience-card">
+    <div class="a-card glass reveal d2">
       <h3 data-lang="en">Indie hackers</h3><h3 data-lang="ko">인디 해커</h3><h3 data-lang="zh">独立开发者</h3>
-      <p data-lang="en">Ship faster with auto-generated docs and landing pages. Every project gets a professional first impression.</p>
-      <p data-lang="ko">자동 생성 문서와 랜딩 페이지로 더 빠르게 출시. 모든 프로젝트에 프로페셔널한 첫인상.</p>
-      <p data-lang="zh">自动生成文档和着陆页，更快发布。每个项目都有专业的第一印象。</p>
+      <p data-lang="en">Ship faster. Auto-generated docs and landing page give every project a professional first impression.</p>
+      <p data-lang="ko">더 빠르게 출시. 자동 생성 문서와 랜딩 페이지로 모든 프로젝트에 프로 첫인상.</p>
+      <p data-lang="zh">更快发布。自动生成文档和着陆页，让每个项目都有专业第一印象。</p>
     </div>
-    <div class="audience-card">
+    <div class="a-card glass reveal d1">
       <h3 data-lang="en">Non-developers</h3><h3 data-lang="ko">비개발자</h3><h3 data-lang="zh">非开发者</h3>
-      <p data-lang="en">No terminal knowledge needed. Say "make docs" and "push this for me" in plain language.</p>
+      <p data-lang="en">No terminal knowledge needed. Just say "make docs" and "push this for me" in plain words.</p>
       <p data-lang="ko">터미널 지식 불필요. "문서 만들어줘", "올려줘" 라고 말하면 됩니다.</p>
       <p data-lang="zh">不需要终端知识。只需说"写文档"和"帮我推送"。</p>
     </div>
-    <div class="audience-card">
+    <div class="a-card glass reveal d2">
       <h3 data-lang="en">Open source maintainers</h3><h3 data-lang="ko">오픈소스 메인테이너</h3><h3 data-lang="zh">开源维护者</h3>
-      <p data-lang="en">Keep docs in sync with code. Trilingual README means global reach from day one.</p>
-      <p data-lang="ko">코드와 문서를 동기화. 3개국어 README로 첫날부터 글로벌.</p>
-      <p data-lang="zh">文档与代码同步。三语言 README 从第一天就面向全球。</p>
+      <p data-lang="en">Keep docs in sync. Trilingual README means global reach from day one.</p>
+      <p data-lang="ko">문서를 코드와 동기화. 3개국어 README로 첫날부터 글로벌.</p>
+      <p data-lang="zh">保持文档同步。三语言 README 从第一天就面向全球。</p>
     </div>
   </div>
 </section>
 
-<!-- ━━━ TECH (collapsible) ━━━ -->
 <section class="reveal wide">
-  <div class="label" data-lang="en">Under the hood</div>
-  <div class="label" data-lang="ko">기술 세부</div>
-  <div class="label" data-lang="zh">技术细节</div>
-  <h2 data-lang="en">For the curious</h2>
-  <h2 data-lang="ko">궁금한 분들을 위해</h2>
-  <h2 data-lang="zh">给好奇的人</h2>
-  <p class="sub" data-lang="en">NerdSpecs is an MCP server with 8 tools. It doesn't call any AI API — your CLI is the brain.</p>
-  <p class="sub" data-lang="ko">NerdSpecs는 8개 도구를 가진 MCP 서버입니다. AI API를 호출하지 않습니다 — 당신의 CLI가 두뇌.</p>
-  <p class="sub" data-lang="zh">NerdSpecs 是一个有 8 个工具的 MCP 服务器。它不调用任何 AI API — 你的 CLI 就是大脑。</p>
-
-  <button class="detail-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
-    <span data-lang="en">8 MCP Tools</span><span data-lang="ko">8개 MCP 도구</span><span data-lang="zh">8 个 MCP 工具</span>
-  </button>
-  <div class="detail-content">
-    <div class="detail-inner">
-      <div class="tool-card"><code>analyze_project</code><p data-lang="en">Scan code, detect language and framework</p><p data-lang="ko">코드 스캔, 언어/프레임워크 감지</p><p data-lang="zh">扫描代码，检测语言和框架</p></div>
-      <div class="tool-card"><code>generate_readme</code><p data-lang="en">Generate trilingual README.md</p><p data-lang="ko">3개국어 README.md 생성</p><p data-lang="zh">生成三语言 README.md</p></div>
-      <div class="tool-card"><code>generate_landing_page</code><p data-lang="en">Dark-themed landing page</p><p data-lang="ko">다크 테마 랜딩 페이지</p><p data-lang="zh">暗色主题着陆页</p></div>
-      <div class="tool-card"><code>fetch_repo_metadata</code><p data-lang="en">Fetch GitHub repo info</p><p data-lang="ko">GitHub 레포 정보 가져오기</p><p data-lang="zh">获取 GitHub 仓库信息</p></div>
-      <div class="tool-card"><code>save_decision</code><p data-lang="en">Record adopt/skip/watch</p><p data-lang="ko">도입/스킵/관찰 기록</p><p data-lang="zh">记录采用/跳过/观察</p></div>
-      <div class="tool-card"><code>get_project_status</code><p data-lang="en">Check config and motivation</p><p data-lang="ko">설정 및 동기 확인</p><p data-lang="zh">检查配置和动机</p></div>
-      <div class="tool-card"><code>auto_commit_and_push</code><p data-lang="en">Commit + push in one step</p><p data-lang="ko">커밋 + 푸시 한 번에</p><p data-lang="zh">一步提交和推送</p></div>
-      <div class="tool-card"><code>suggest_next_steps</code><p data-lang="en">Smart next-action suggestions</p><p data-lang="ko">다음 단계 스마트 제안</p><p data-lang="zh">智能下一步建议</p></div>
+  <div class="label" data-lang="en">Under the hood</div><div class="label" data-lang="ko">기술 세부</div><div class="label" data-lang="zh">技术细节</div>
+  <h2 data-lang="en">For the curious</h2><h2 data-lang="ko">궁금한 분들을 위해</h2><h2 data-lang="zh">给好奇的人</h2>
+  <p class="sub" data-lang="en">NerdSpecs is an MCP server with 8 tools. Your AI CLI is the brain — NerdSpecs is the hands.</p>
+  <p class="sub" data-lang="ko">NerdSpecs는 8개 도구의 MCP 서버. AI CLI가 두뇌 — NerdSpecs가 손.</p>
+  <p class="sub" data-lang="zh">NerdSpecs 是有 8 个工具的 MCP 服务器。AI CLI 是大脑 — NerdSpecs 是双手。</p>
+  <button class="toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span data-lang="en">8 MCP Tools</span><span data-lang="ko">8개 MCP 도구</span><span data-lang="zh">8 个 MCP 工具</span></button>
+  <div class="collapse">
+    <div class="collapse-inner">
+      <div class="t-card"><code>analyze_project</code><p data-lang="en">Detect language, framework, dependencies</p><p data-lang="ko">언어, 프레임워크, 의존성 감지</p><p data-lang="zh">检测语言、框架、依赖</p></div>
+      <div class="t-card"><code>generate_readme</code><p data-lang="en">Trilingual README.md</p><p data-lang="ko">3개국어 README.md</p><p data-lang="zh">三语言 README.md</p></div>
+      <div class="t-card"><code>generate_landing_page</code><p data-lang="en">Dark-themed landing page</p><p data-lang="ko">다크 테마 랜딩 페이지</p><p data-lang="zh">暗色着陆页</p></div>
+      <div class="t-card"><code>fetch_repo_metadata</code><p data-lang="en">GitHub repo info</p><p data-lang="ko">GitHub 레포 정보</p><p data-lang="zh">GitHub 仓库信息</p></div>
+      <div class="t-card"><code>save_decision</code><p data-lang="en">Record adopt/skip/watch</p><p data-lang="ko">도입/스킵/관찰 기록</p><p data-lang="zh">记录采用/跳过/观察</p></div>
+      <div class="t-card"><code>get_project_status</code><p data-lang="en">Config and motivation</p><p data-lang="ko">설정 및 동기</p><p data-lang="zh">配置和动机</p></div>
+      <div class="t-card"><code>auto_commit_and_push</code><p data-lang="en">Commit + push in one step</p><p data-lang="ko">커밋 + 푸시 한 번에</p><p data-lang="zh">一步提交推送</p></div>
+      <div class="t-card"><code>suggest_next_steps</code><p data-lang="en">Smart next actions</p><p data-lang="ko">다음 단계 제안</p><p data-lang="zh">智能下一步</p></div>
     </div>
   </div>
-
-  <button class="detail-toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')" style="margin-top:.75rem">
-    <span data-lang="en">Compatible AI CLIs (9)</span><span data-lang="ko">호환 AI CLI (9개)</span><span data-lang="zh">兼容的 AI CLI（9 个）</span>
-  </button>
-  <div class="detail-content">
-    <div class="cli-list" style="padding:1.5rem">
-      <span class="cli-tag">Claude Code</span><span class="cli-tag">Gemini CLI</span><span class="cli-tag">Codex CLI</span>
-      <span class="cli-tag">OpenCode</span><span class="cli-tag">Qwen Code</span><span class="cli-tag">Cursor</span>
-      <span class="cli-tag">VS Code</span><span class="cli-tag">Continue</span><span class="cli-tag">Cline</span>
+  <button class="toggle" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span data-lang="en">Compatible with 9 AI CLIs</span><span data-lang="ko">9개 AI CLI 호환</span><span data-lang="zh">兼容 9 个 AI CLI</span></button>
+  <div class="collapse">
+    <div class="cli-wrap">
+      <span class="cli-tag">Claude Code</span><span class="cli-tag">Gemini CLI</span><span class="cli-tag">Codex CLI</span><span class="cli-tag">OpenCode</span><span class="cli-tag">Qwen Code</span><span class="cli-tag">Cursor</span><span class="cli-tag">VS Code</span><span class="cli-tag">Continue</span><span class="cli-tag">Cline</span>
     </div>
   </div>
 </section>
 
-<!-- ━━━ CTA ━━━ -->
-<section id="cta" class="reveal">
-  <h2 data-lang="en">Start in 10 seconds</h2>
-  <h2 data-lang="ko">10초 만에 시작</h2>
-  <h2 data-lang="zh">10 秒开始</h2>
-  <p class="sub center" data-lang="en">Add this to your AI tool's config file. Then just ask.</p>
-  <p class="sub center" data-lang="ko">AI 도구의 설정 파일에 추가하세요. 그리고 말하세요.</p>
-  <p class="sub center" data-lang="zh">添加到你的 AI 工具配置文件。然后开口就行。</p>
-  <div class="code-block"><span class="p">// .mcp.json</span><br><span class="p">{</span><br>&nbsp;&nbsp;<span class="k">"mcpServers"</span><span class="p">: {</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"nerdspecs"</span><span class="p">: {</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"command"</span><span class="p">:</span> <span class="s">"npx"</span><span class="p">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"args"</span><span class="p">:</span> [<span class="s">"-y"</span><span class="p">,</span> <span class="s">"nerdspecs"</span>]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span><br>&nbsp;&nbsp;<span class="p">}</span><br><span class="p">}</span></div>
+<section id="cta" class="reveal center">
+  <h2 data-lang="en">Start in 10 seconds</h2><h2 data-lang="ko">10초 만에 시작</h2><h2 data-lang="zh">10 秒开始</h2>
+  <p class="sub" data-lang="en">Add this to your config. Then just ask your AI.</p>
+  <p class="sub" data-lang="ko">설정에 추가하세요. 그리고 AI에게 말하세요.</p>
+  <p class="sub" data-lang="zh">添加到配置文件。然后问你的 AI。</p>
+  <div class="code-box"><span class="p">// .mcp.json</span><br><span class="p">{</span><br>&nbsp;&nbsp;<span class="k">"mcpServers"</span><span class="p">: {</span><br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"nerdspecs"</span><span class="p">: {</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"command"</span><span class="p">:</span> <span class="s">"npx"</span><span class="p">,</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="k">"args"</span><span class="p">:</span> [<span class="s">"-y"</span><span class="p">,</span> <span class="s">"nerdspecs"</span>]<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="p">}</span><br>&nbsp;&nbsp;<span class="p">}</span><br><span class="p">}</span></div>
   <div class="nerd"><pre>   ╭─────╮ ╭─────╮
    │ ●   │─│   ● │
    ╰─────╯ ╰─────╯</pre></div>
 </section>
 
 <footer>
-  <p>MIT License · <a href="https://github.com/lucasung-debug/nerdspecs">GitHub</a> · <a href="https://www.npmjs.com/package/nerdspecs">npm</a></p>
+  <p>MIT License &middot; <a href="https://github.com/lucasung-debug/nerdspecs">GitHub</a> &middot; <a href="https://www.npmjs.com/package/nerdspecs">npm</a></p>
   <p style="margin-top:.4rem">Made with NerdSpecs</p>
 </footer>
 
 <script>
 var L=['en','ko','zh'],i=0;
-function show(l){document.querySelectorAll('[data-lang]').forEach(function(e){e.style.display=e.getAttribute('data-lang')===l?'':'none'});var m={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'};document.querySelector('.lang-btn').textContent=m[l]||'EN';localStorage.setItem('nerdspecs-lang',l)}
+function show(l){document.querySelectorAll('[data-lang]').forEach(function(e){e.style.display=e.getAttribute('data-lang')===l?'':'none'});document.querySelector('.lang-btn').textContent={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'}[l]||'EN';localStorage.setItem('nerdspecs-lang',l)}
 function cycleLang(){i=(i+1)%L.length;show(L[i])}
-var saved=localStorage.getItem('nerdspecs-lang')||'en';i=L.indexOf(saved);if(i<0)i=0;show(L[i]);
-var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+var s=localStorage.getItem('nerdspecs-lang')||'en';i=L.indexOf(s);if(i<0)i=0;show(L[i]);
+var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('v');obs.unobserve(e.target)}})},{threshold:.08,rootMargin:'0px 0px -60px 0px'});
 document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
 </script>
 </body>
