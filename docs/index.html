@@ -163,17 +163,17 @@ footer a{color:var(--sub)}
 <section id="hero">
   <div class="hero-glow"></div>
   <div class="hero-glow2"></div>
-  <h1 class="reveal" data-lang="en">You built something<br>amazing with AI.<br>Now <em>explain it</em>.</h1>
-  <h1 class="reveal" data-lang="ko">AI로 대단한 걸<br>만들었습니다.<br>이제 <em>설명할 차례</em>.</h1>
-  <h1 class="reveal" data-lang="zh">你用 AI 做了<br>了不起的东西。<br>现在，<em>让别人看懂</em>。</h1>
-  <p class="hero-sub reveal d1" data-lang="en">NerdSpecs turns your project into documentation that anyone can understand. One sentence from you — complete README and landing page from us.</p>
-  <p class="hero-sub reveal d1" data-lang="ko">NerdSpecs가 프로젝트를 누구나 이해할 수 있는 문서로 바꿔줍니다. 당신의 한 문장 — 완전한 README와 랜딩 페이지.</p>
-  <p class="hero-sub reveal d1" data-lang="zh">NerdSpecs 将你的项目变成任何人都能理解的文档。你说一句话 — 完整的 README 和着陆页。</p>
-  <div class="btn-row reveal d2">
+  <h1 data-lang="en">You built something<br>amazing with AI.<br>Now <em>explain it</em>.</h1>
+  <h1 data-lang="ko">AI로 대단한 걸<br>만들었습니다.<br>이제 <em>설명할 차례</em>.</h1>
+  <h1 data-lang="zh">你用 AI 做了<br>了不起的东西。<br>现在，<em>让别人看懂</em>。</h1>
+  <p class="hero-sub" data-lang="en">NerdSpecs turns your project into documentation that anyone can understand. One sentence from you — complete README and landing page from us.</p>
+  <p class="hero-sub" data-lang="ko">NerdSpecs가 프로젝트를 누구나 이해할 수 있는 문서로 바꿔줍니다. 당신의 한 문장 — 완전한 README와 랜딩 페이지.</p>
+  <p class="hero-sub" data-lang="zh">NerdSpecs 将你的项目变成任何人都能理解的文档。你说一句话 — 完整的 README 和着陆页。</p>
+  <div class="btn-row">
     <a href="https://www.npmjs.com/package/nerdspecs" class="btn btn-fill" target="_blank"><span data-lang="en">Get Started Free</span><span data-lang="ko">무료로 시작</span><span data-lang="zh">免费开始</span></a>
     <a href="https://github.com/lucasung-debug/nerdspecs" class="btn btn-ghost" target="_blank"><span data-lang="en">View on GitHub</span><span data-lang="ko">GitHub 보기</span><span data-lang="zh">GitHub 查看</span></a>
   </div>
-  <div class="term-wrap reveal d3">
+  <div class="term-wrap">
     <div class="term">
       <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-t">Claude Code</span></div>
       <div class="term-body">
@@ -354,7 +354,7 @@ footer a{color:var(--sub)}
 
 <script>
 var L=['en','ko','zh'],i=0;
-function show(l){document.querySelectorAll('[data-lang]').forEach(function(e){e.style.display=e.getAttribute('data-lang')===l?'':'none'});document.querySelector('.lang-btn').textContent={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'}[l]||'EN';localStorage.setItem('nerdspecs-lang',l)}
+function show(l){document.querySelectorAll('[data-lang]').forEach(function(e){if(e.getAttribute('data-lang')===l){e.style.display=''}else{e.style.display='none'}});document.querySelector('.lang-btn').textContent={en:'EN → KO',ko:'KO → ZH',zh:'ZH → EN'}[l]||'EN';localStorage.setItem('nerdspecs-lang',l)}
 function cycleLang(){i=(i+1)%L.length;show(L[i])}
 var s=localStorage.getItem('nerdspecs-lang')||'en';i=L.indexOf(s);if(i<0)i=0;show(L[i]);
 var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('v');obs.unobserve(e.target)}})},{threshold:.08,rootMargin:'0px 0px -60px 0px'});
